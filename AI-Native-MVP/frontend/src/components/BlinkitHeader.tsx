@@ -8,9 +8,10 @@ function BlinkitWordmark() {
   return (
     <span
       aria-label="Blinkit"
-      className="select-none text-[26px] font-extrabold lowercase leading-none tracking-[-0.5px] text-[#318616]"
+      className="select-none text-[26px] font-extrabold lowercase leading-none tracking-[-0.5px]"
     >
-      blinkit
+      <span className="text-black">blink</span>
+      <span className="text-[#318616]">it</span>
     </span>
   );
 }
@@ -46,20 +47,19 @@ export function BlinkitHeader() {
 
       {/* Delivery + address */}
       <div className="px-container-padding pb-2 pt-3">
-        <p className="text-[15px] font-bold leading-tight text-on-surface">
-          delivery in 10 minutes
-        </p>
-        <div className="mt-1.5 flex items-center gap-2">
-          <p className="min-w-0 flex-1 truncate text-[13px] leading-snug text-on-surface">
-            {BLINKIT_HOME_ADDRESS}
-          </p>
-          <button
-            aria-label="Change delivery address"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F8CB46] text-on-surface"
-            type="button"
-          >
-            <Icon name="arrow_forward" size={16} />
-          </button>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-bold leading-tight text-on-surface">
+              delivery in 10 minutes
+            </p>
+            <div className="mt-1.5 flex min-w-0 items-center">
+              <span className="truncate text-[13px] leading-snug text-on-surface">
+                {BLINKIT_HOME_ADDRESS}
+              </span>
+              <Icon className="shrink-0 text-on-surface" name="keyboard_arrow_down" size={18} />
+            </div>
+          </div>
+          <Icon className="mt-0.5 shrink-0 text-on-surface" filled name="account_circle" size={28} />
         </div>
       </div>
 
