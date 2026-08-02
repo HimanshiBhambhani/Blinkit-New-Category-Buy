@@ -85,30 +85,63 @@ def render_analyser(
 ) -> None:
     """Re-run theme summary on corpus; show top themes and quotes."""
     st.markdown("##### 3. Analyser")
-    st.caption("Re-run theme analysis on the bundled CSV — offline, auditable, no LLM-generated numbers.")
+    st.caption(
+        "Aggregates **pre-classified** themes from the committed CSV — "
+        "not a live scrape, embedding pass, or LLM call."
+    )
+
+    if "analyser_ran" not in st.session_state:
+        st.session_state.analyser_ran = False
 
     categories = sorted(df["Target Category"].dropna().unique())
     cat_filter = st.selectbox(
         "Filter by category (optional)",
         options=["All categories"] + list(categories),
         index=0,
+        key="analyser_category_filter",
     )
 
     if st.button("Re-run analyser on committed corpus (MVP)", type="primary", use_container_width=False):
         if on_rerun:
             on_rerun()
-        st.session_state["analyser_ran"] = True
-        st.session_state["analyser_cat"] = cat_filter
+        st.session_state.analyser_ran = True
+        st.session_state.analyser_run_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        st.session_state.analyser_corpus_rows = len(df)
+        st.rerun()
+
+    if not st.session_state.analyser_ran:
+        st.info(
+            "Theme summary is not shown until you run the analyser. "
+            "Click **Re-run analyser** to reload the CSV and compute counts + quotes."
+        )
+        return
 
     filtered = df if cat_filter == "All categories" else df[df["Target Category"] == cat_filter]
-    themes = get_theme_summary(filtered)
-    top_themes = themes[:5]
 
-    if st.session_state.get("analyser_ran"):
-        st.success(
-            f"Analysis complete — {len(filtered):,} reviews, "
-            f"{filtered['Primary Theme'].nunique()} themes"
-            + (f" ({cat_filter})" if cat_filter != "All categories" else "")
+    with st.spinner("Aggregating themes from committed corpus…"):
+        themes = get_theme_summary(filtered)
+        top_themes = themes[:5]
+        analysis_steps = [
+            f"Reloaded `{config.CLEAN_OUTPUT_CSV.name}` from disk "
+            f"({st.session_state.get('analyser_corpus_rows', len(df)):,} rows in corpus)",
+            f"Filtered to **{len(filtered):,}** reviews"
+            + (f" · category `{cat_filter}`" if cat_filter != "All categories" else ""),
+            f"Counted **{filtered['Primary Theme'].nunique()}** distinct theme labels (pre-baked in CSV)",
+            f"Ranked top **{len(top_themes)}** themes by volume and pulled representative quotes",
+        ]
+
+    run_at = st.session_state.get("analyser_run_at", "just now")
+    st.success(
+        f"Analysis complete — {len(filtered):,} reviews, "
+        f"{filtered['Primary Theme'].nunique()} themes · last run {run_at}"
+    )
+
+    with st.expander("What ran (offline steps)", expanded=True):
+        for step in analysis_steps:
+            st.markdown(f"- {step}")
+        st.markdown(
+            "_Themes were classified offline during pipeline build; this button recomputes "
+            "summary statistics only._"
         )
 
     if not top_themes:
@@ -130,16 +163,11 @@ def render_analyser(
                 f"&ldquo;{q_trunc}&rdquo;</div>"
             )
 
-        if badge_fn:
-            header_badges = f"{badge} {count_badge}"
-        else:
-            header_badges = f"{pct}% · {theme['count']} reviews"
-
         st.markdown(
             f'<div class="fluent-card" style="padding:var(--space-md) var(--space-lg);margin-bottom:12px;">'
             f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
             f'<div style="font-weight:600;color:var(--neutral-fg-1);">{theme["theme"]}</div>'
-            f"<div>{header_badges if not badge_fn else badge + ' ' + count_badge}</div>"
+            f"<div>{badge + ' ' + count_badge if badge_fn else f'{pct}% · {theme['count']} reviews'}</div>"
             f"</div>{quotes_html}</div>",
             unsafe_allow_html=True,
         )
@@ -157,7 +185,8 @@ def render_analyser_page(
     st.markdown(
         '<div class="fluent-hero"><h1>AI Analyser</h1>'
         "<p>Workflow · Data · Analyser — evaluator-facing view of the discovery pipeline "
-        "on the <strong>committed corpus</strong> (no live scrape).</p></div>",
+        "on the <strong>committed corpus</strong>. Re-run recomputes theme summaries from "
+        "pre-classified CSV rows (seconds, offline).</p></div>",
         unsafe_allow_html=True,
     )
 

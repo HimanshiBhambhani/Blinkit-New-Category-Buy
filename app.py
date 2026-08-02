@@ -963,7 +963,7 @@ with st.sidebar:
         label_visibility="collapsed",
     )
 
-# Load data
+# Load data (cache cleared + st.rerun on analyser Re-run reloads CSV fresh)
 try:
     df = load_data()
 except FileNotFoundError:
