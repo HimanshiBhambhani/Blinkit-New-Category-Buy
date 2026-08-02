@@ -28,7 +28,6 @@ import config
 from engine.themes import identify_themes, get_theme_summary, get_cross_theme_patterns
 from engine.insights import STRATEGIC_QUESTIONS, generate_insight_offline
 from engine.chatbot import RAGChatbot
-from engine.buy_smart_ui import render_buy_smart_page
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -943,7 +942,7 @@ def get_patterns(_df_hash):
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  SIDEBAR — Fluent 2 Navigation Pane (3 Tabs)
+#  SIDEBAR — Fluent 2 Navigation Pane
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 BLINKIT_LOGO_SVG = '<svg viewBox="0 0 120 28" width="120" height="28" xmlns="http://www.w3.org/2000/svg"><text x="0" y="22" font-family="Segoe UI Variable, Segoe UI, -apple-system, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.5"><tspan fill="#F8C831">blinki</tspan><tspan fill="#4CAF50">t</tspan></text></svg>'
@@ -958,7 +957,6 @@ with st.sidebar:
         [
             "Insights",
             "AI Chatbot",
-            "Buy Smart MVP",
             "Workflow \u2014 How It Works",
         ],
         label_visibility="collapsed",
@@ -1110,14 +1108,6 @@ if page == "Insights":
             ("Stage 3: Category isolation", len(df)),
         ]
         st.markdown(fluent_funnel_html(funnel_steps, funnel_steps[0][1]), unsafe_allow_html=True)
-
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  TAB — BUY SMART MVP (in-app trust prototype)
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-elif page == "Buy Smart MVP":
-    render_buy_smart_page(df)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
