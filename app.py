@@ -28,6 +28,7 @@ import config
 from engine.themes import identify_themes, get_theme_summary, get_cross_theme_patterns
 from engine.insights import STRATEGIC_QUESTIONS, generate_insight_offline
 from engine.chatbot import RAGChatbot
+from engine.analyser_panel import render_analyser_page
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -957,7 +958,7 @@ with st.sidebar:
         [
             "Insights",
             "AI Chatbot",
-            "Workflow \u2014 How It Works",
+            "AI Analyser",
         ],
         label_visibility="collapsed",
     )
@@ -1301,185 +1302,67 @@ elif page == "AI Chatbot":
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#  TAB 3 — WORKFLOW — HOW IT WORKS
+#  TAB 3 — AI ANALYSER (Phase 8H: workflow · data · analyser)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-elif page == "Workflow \u2014 How It Works":
-    st.markdown("## Workflow \u2014 How It Works")
-    st.caption("End-to-end pipeline from raw data sources to AI-powered insights.")
+elif page == "AI Analyser":
 
-    # ── Animated Pipeline Flow ──
-    PIPELINE_FLOW_HTML = (
-        '<div style="display:flex;flex-direction:column;gap:0;align-items:center;margin:24px 0;">'
-        # Node 1
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.3s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F4E5</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">Data Sources</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">Play Store \u2022 App Store \u2022 Reddit \u2022 YouTube \u2022 HackerNews \u2022 PissedConsumer</div>'
-        '<div style="margin-top:6px;">' + fluent_badge("29,478 raw items", "neutral") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 2
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.4s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F504</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">Ingestion & Deduplication</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">Merge CSVs, normalize fields, remove exact duplicates</div>'
-        '<div style="margin-top:6px;">' + fluent_badge("28,274 unique", "brand") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 3
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.5s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F6AB</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">Stage 1: Transactional Noise</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">Remove delivery/logistics/app-crash complaints</div>'
-        '<div style="margin-top:6px;">' + fluent_badge("27,589 remain", "brand") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 4
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.6s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\u2B50</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">Stage 2: Rating & Praise Filter</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">Remove generic 5-star praise without friction signal</div>'
-        '<div style="margin-top:6px;">' + fluent_badge("26,680 remain", "warning") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 5
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.7s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F3AF</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">Stage 3: Category Isolation</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">Keep only non-grocery cross-shopping friction mentions</div>'
-        '<div style="margin-top:6px;">' + fluent_badge(f"{len(df):,} final reviews", "success") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 6
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.8s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F3F7\uFE0F</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">Classification & Theming</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">Assign Target Category, Friction Pillar, Primary Theme</div>'
-        '<div style="margin-top:6px;">' + fluent_badge(f"{df['Target Category'].nunique()} categories", "neutral") + " " + fluent_badge(f"{df['Friction Pillar'].nunique()} pillars", "neutral") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 7
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);animation:fadeSlideIn 0.9s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F9E0</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">FAISS Vector Index</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">all-MiniLM-L6-v2 embeddings (384 dims) for semantic search</div>'
-        '<div style="margin-top:6px;">' + fluent_badge(f"{len(df):,} vectors indexed", "brand") + '</div>'
-        '</div>'
-        '<div style="font-size:20px;color:var(--neutral-fg-3);margin:4px 0;">\u2193</div>'
-        # Node 8
-        '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);border-left:4px solid var(--brand-primary);animation:fadeSlideIn 1.0s ease-out;">'
-        '<div style="font-size:24px;margin-bottom:4px;">\U0001F916</div>'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);">AI Chatbot (Groq Llama 3.3 70B)</div>'
-        '<div style="font-size:12px;color:var(--neutral-fg-3);">RAG-powered Q&A with guardrails, confidence scoring, evidence grounding</div>'
-        '<div style="margin-top:6px;">' + fluent_badge("Semantic + Keyword retrieval", "success") + '</div>'
-        '</div>'
-        '</div>'
+    def _clear_corpus_cache():
+        load_data.clear()
+        get_themes.clear()
+        get_patterns.clear()
+
+    render_analyser_page(
+        df,
+        badge_fn=fluent_badge,
+        on_rerun=_clear_corpus_cache,
     )
-    st.markdown(PIPELINE_FLOW_HTML, unsafe_allow_html=True)
 
-    st.divider()
+    with st.expander("Extended pipeline details (optional)", expanded=False):
+        st.caption("Full funnel diagram, stage notes, CI/CD, and pipeline statistics.")
 
-    # ── Detailed Stage Descriptions (expandable) ──
-    st.markdown("##### Stage details")
+        pipeline_html = (
+            '<div style="display:flex;flex-direction:column;gap:0;align-items:center;margin:16px 0;">'
+            '<div class="fluent-card" style="width:100%;max-width:600px;text-align:center;padding:var(--space-md);">'
+            '<div style="font:var(--font-subtitle-2);">Data Sources → Ingest → 3-stage filter → Classify → FAISS → Chatbot</div>'
+            '<div style="font-size:12px;color:var(--neutral-fg-3);margin-top:6px;">'
+            + fluent_badge("29,478 raw", "neutral") + " "
+            + fluent_badge(f"{len(df):,} final", "success")
+            + "</div></div></div>"
+        )
+        st.markdown(pipeline_html, unsafe_allow_html=True)
 
-    with st.expander("Data ingestion architecture", expanded=False):
+        st.markdown("##### Data ingestion pathways")
         st.markdown(
-            '<div class="fluent-card">'
-            '<table style="width:100%;font-size:14px;border-collapse:collapse;">'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;font-weight:600;">Pathway</td>'
-            '<td style="padding:8px 12px;font-weight:600;">Source</td>'
-            '<td style="padding:8px 12px;font-weight:600;">Method</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;"><span class="fluent-badge fluent-badge--brand">A: Live</span></td>'
-            '<td style="padding:8px 12px;">Play Store + App Store</td>'
-            '<td style="padding:8px 12px;">Programmatic API scraping</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;"><span class="fluent-badge fluent-badge--neutral">B: Historical</span></td>'
-            '<td style="padding:8px 12px;">Play Store, App Store, Reddit, YouTube, HackerNews, PissedConsumer</td>'
-            '<td style="padding:8px 12px;">Pre-collected CSV dumps</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;"><span class="fluent-badge fluent-badge--success">B: Curated</span></td>'
-            '<td style="padding:8px 12px;">32 Reddit thread URLs</td>'
-            '<td style="padding:8px 12px;">Playwright browser scraping (1,243 items)</td></tr>'
-            '<tr>'
-            '<td style="padding:8px 12px;"><span class="fluent-badge fluent-badge--warning">B: Expert</span></td>'
-            '<td style="padding:8px 12px;">19 pre-classified Reddit threads</td>'
-            '<td style="padding:8px 12px;">Expert-labeled categories + friction pillars</td></tr>'
-            '</table></div>',
-            unsafe_allow_html=True,
+            "| Pathway | Source | Method |\n"
+            "|---------|--------|--------|\n"
+            "| A: Live | Play Store + App Store | Programmatic scraping |\n"
+            "| B: Historical | Reddit, YouTube, HN, PissedConsumer | Pre-collected CSVs |\n"
+            "| B: Curated | 32 Reddit threads | Playwright scrape |\n"
+            "| B: Expert | 19 labeled threads | Expert categories + pillars |"
         )
 
-    with st.expander("Theme identification methodology", expanded=False):
-        st.markdown("""**Two complementary approaches:**
-
-1. **Rule-based theme detection** (offline, deterministic) \u2014 10 predefined theme patterns with regex keyword lists. Each review matched against all patterns; highest-match theme assigned.
-
-2. **AI-powered semantic clustering** (Groq + local embeddings) \u2014 Reviews embedded via `all-MiniLM-L6-v2` (384 dims). FAISS index enables semantic search. Groq Llama 3.3 70B generates structured theme analysis grounded in evidence.""")
-
-    with st.expander("Validation framework", expanded=False):
+        st.markdown("##### Validation")
         st.markdown(
-            '<div class="fluent-card">'
-            '<table style="width:100%;font-size:14px;border-collapse:collapse;">'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;font-weight:600;">Method</td>'
-            '<td style="padding:8px 12px;font-weight:600;">Description</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;">Data quality gate</td>'
-            '<td style="padding:8px 12px;">3-stage filter removes logistics noise, 5-star praise, and grocery complaints</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;">Source triangulation</td>'
-            '<td style="padding:8px 12px;">Reviews from 7+ channels \u2014 same patterns across sources = higher confidence</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;">Quote grounding</td>'
-            '<td style="padding:8px 12px;">Every theme cites verbatim user quotes \u2014 no unsubstantiated claims</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;">Confidence scoring</td>'
-            '<td style="padding:8px 12px;">Each insight rated high / medium / low based on evidence density</td></tr>'
-            '<tr style="border-bottom:1px solid var(--neutral-stroke-1);">'
-            '<td style="padding:8px 12px;">Evidence gap disclosure</td>'
-            '<td style="padding:8px 12px;">Explicitly states what data is missing to strengthen each finding</td></tr>'
-            '<tr>'
-            '<td style="padding:8px 12px;">Cross-pattern validation</td>'
-            '<td style="padding:8px 12px;">Theme x Category matrix reveals category-specific vs systemic patterns</td></tr>'
-            '</table></div>',
-            unsafe_allow_html=True,
+            "- 3-stage filter removes logistics noise, generic praise, grocery-only mentions\n"
+            "- Source triangulation across 7+ channels\n"
+            "- Quote grounding on every theme\n"
+            "- Confidence tiers by evidence density"
         )
 
-    st.divider()
+        st.markdown(
+            '[View GitHub Actions pipeline](https://github.com/HimanshiBhambhani/Grad-Project/actions)'
+        )
 
-    # ── GitHub Actions Status & Link ──
-    st.markdown("##### CI/CD Pipeline")
+        ps1, ps2 = st.columns(2)
+        with ps1:
+            st.markdown(
+                f"- Raw input: 29,478\n- After dedup: 28,274\n- Stage 1: 27,589\n"
+                f"- Stage 2: 26,680\n- Stage 3: {len(df):,}"
+            )
+        with ps2:
+            st.markdown(
+                f"- Sources: {df['Source'].nunique()}\n- Categories: {df['Target Category'].nunique()}\n"
+                f"- Pillars: {df['Friction Pillar'].nunique()}\n- Themes: {df['Primary Theme'].nunique()}"
+            )
 
-    github_actions_html = (
-        '<div class="fluent-card" style="display:flex;align-items:center;gap:var(--space-lg);">'
-        '<div style="flex:1;">'
-        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);margin-bottom:4px;">GitHub Actions</div>'
-        '<div style="font-size:13px;color:var(--neutral-fg-2);">Automated data pipeline runs on schedule and push events. Includes scraping, filtering, embedding, and index rebuilding.</div>'
-        '</div>'
-        '<a href="https://github.com/HimanshiBhambhani/Grad-Project/actions" target="_blank" '
-        'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;'
-        'background:var(--brand-primary);color:white;border-radius:var(--radius-sm);'
-        'text-decoration:none;font-size:14px;font-weight:600;white-space:nowrap;">'
-        '\u2192 View on GitHub Actions</a>'
-        '</div>'
-    )
-    st.markdown(github_actions_html, unsafe_allow_html=True)
-
-    # Pipeline stats footer
-    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-    st.markdown("##### Pipeline statistics")
-    ps1, ps2 = st.columns(2)
-    with ps1:
-        st.markdown(f"""- **Raw input rows:** 29,478
-- **After dedup:** 28,274
-- **Stage 1 (noise):** 27,589
-- **Stage 2 (rating):** 26,680
-- **Stage 3 (category):** {len(df):,}""")
-    with ps2:
-        st.markdown(f"""- **Source channels:** {df['Source'].nunique()}
-- **Categories:** {df['Target Category'].nunique()}
-- **Friction pillars:** {df['Friction Pillar'].nunique()}
-- **Themes identified:** {df['Primary Theme'].nunique()}
-- **Retention rate:** {len(df)/28274*100:.1f}%""")

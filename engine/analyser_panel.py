@@ -1,0 +1,172 @@
+"""
+engine/analyser_panel.py — Link A AI Analyser (Phase 8H).
+
+Surfaces workflow, data stats, and re-runnable theme analysis on the committed corpus.
+No live scraping — offline only for eval stability.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
+import config
+from engine.themes import get_theme_summary
+
+
+def _corpus_mtime(path: Path) -> str:
+    if not path.exists():
+        return "unknown"
+    ts = path.stat().st_mtime
+    return datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def render_workflow_section() -> None:
+    """Static pipeline diagram — ingest through Link B scores."""
+    st.markdown("##### 1. Workflow")
+    st.caption("End-to-end path from raw reviews to trust signals (Link B uses same classified corpus).")
+
+    steps = [
+        ("Ingest", "Play Store · App Store · Reddit · YouTube · CSV dumps"),
+        ("Clean", "Dedup → noise filter → rating filter → category isolation"),
+        ("Embed", "all-MiniLM-L6-v2 → FAISS index (384-dim vectors)"),
+        ("Classify", "Theme labels + Target Category + Friction Pillar"),
+        ("Analyse", "Theme summary, quotes, cross-category patterns"),
+        ("Operationalise", "Link B trust scores from CORPUS A + B (deterministic)"),
+    ]
+    cols = st.columns(len(steps))
+    for col, (title, detail) in zip(cols, steps):
+        with col:
+            st.markdown(
+                f'<div class="fluent-card" style="padding:12px;text-align:center;min-height:100px;">'
+                f'<div style="font-weight:600;font-size:13px;color:var(--neutral-fg-1);">{title}</div>'
+                f'<div style="font-size:11px;color:var(--neutral-fg-3);margin-top:6px;line-height:1.4;">{detail}</div>'
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+
+def render_data_stats(df: pd.DataFrame) -> None:
+    """Corpus metadata and theme distribution."""
+    st.markdown("##### 2. Data")
+    st.caption("Committed corpus in repo — no live fetch required for evaluation.")
+
+    corpus_path = config.CLEAN_OUTPUT_CSV
+    mtime = _corpus_mtime(corpus_path)
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Reviews", f"{len(df):,}")
+    c2.metric("Categories", df["Target Category"].nunique())
+    c3.metric("Themes", df["Primary Theme"].nunique())
+    c4.metric("Sources", df["Source"].nunique())
+
+    st.markdown(
+        f'<div style="font-size:12px;color:var(--neutral-fg-3);margin:8px 0 16px;">'
+        f"<strong>Corpus path:</strong> <code>{corpus_path.name}</code> · "
+        f"<strong>Last modified:</strong> {mtime} · "
+        f"<strong>Policy:</strong> committed corpus (MVP)"
+        f"</div>",
+        unsafe_allow_html=True,
+    )
+
+    theme_counts = df["Primary Theme"].value_counts().head(12)
+    st.markdown("**Theme distribution**")
+    st.bar_chart(theme_counts, horizontal=True, color="#0F6CBD")
+
+
+def render_analyser(
+    df: pd.DataFrame,
+    *,
+    badge_fn=None,
+    on_rerun=None,
+) -> None:
+    """Re-run theme summary on corpus; show top themes and quotes."""
+    st.markdown("##### 3. Analyser")
+    st.caption("Re-run theme analysis on the bundled CSV — offline, auditable, no LLM-generated numbers.")
+
+    categories = sorted(df["Target Category"].dropna().unique())
+    cat_filter = st.selectbox(
+        "Filter by category (optional)",
+        options=["All categories"] + list(categories),
+        index=0,
+    )
+
+    if st.button("Re-run analyser on committed corpus (MVP)", type="primary", use_container_width=False):
+        if on_rerun:
+            on_rerun()
+        st.session_state["analyser_ran"] = True
+        st.session_state["analyser_cat"] = cat_filter
+
+    filtered = df if cat_filter == "All categories" else df[df["Target Category"] == cat_filter]
+    themes = get_theme_summary(filtered)
+    top_themes = themes[:5]
+
+    if st.session_state.get("analyser_ran"):
+        st.success(
+            f"Analysis complete — {len(filtered):,} reviews, "
+            f"{filtered['Primary Theme'].nunique()} themes"
+            + (f" ({cat_filter})" if cat_filter != "All categories" else "")
+        )
+
+    if not top_themes:
+        st.info("No themes found for the selected filter.")
+        return
+
+    st.markdown(f"**Top {len(top_themes)} themes**")
+    for theme in top_themes:
+        pct = theme["percentage"]
+        badge = badge_fn(str(pct) + "%", "brand") if badge_fn else f"{pct}%"
+        count_badge = badge_fn(str(theme["count"]) + " reviews", "neutral") if badge_fn else str(theme["count"])
+
+        quotes_html = ""
+        for q in theme.get("representative_quotes", [])[:3]:
+            q_trunc = q[:180] + ("…" if len(q) > 180 else "")
+            quotes_html += (
+                f'<div style="font-size:12px;color:var(--neutral-fg-2);font-style:italic;'
+                f'margin-top:6px;border-left:2px solid var(--brand-primary);padding-left:8px;">'
+                f"&ldquo;{q_trunc}&rdquo;</div>"
+            )
+
+        if badge_fn:
+            header_badges = f"{badge} {count_badge}"
+        else:
+            header_badges = f"{pct}% · {theme['count']} reviews"
+
+        st.markdown(
+            f'<div class="fluent-card" style="padding:var(--space-md) var(--space-lg);margin-bottom:12px;">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'
+            f'<div style="font-weight:600;color:var(--neutral-fg-1);">{theme["theme"]}</div>'
+            f"<div>{header_badges if not badge_fn else badge + ' ' + count_badge}</div>"
+            f"</div>{quotes_html}</div>",
+            unsafe_allow_html=True,
+        )
+
+
+def render_analyser_page(
+    df: pd.DataFrame,
+    *,
+    badge_fn=None,
+    on_rerun=None,
+    show_legacy_details: bool = False,
+    legacy_details_fn=None,
+) -> None:
+    """Full AI Analyser tab: workflow + data + analyser (+ optional legacy workflow expanders)."""
+    st.markdown(
+        '<div class="fluent-hero"><h1>AI Analyser</h1>'
+        "<p>Workflow · Data · Analyser — evaluator-facing view of the discovery pipeline "
+        "on the <strong>committed corpus</strong> (no live scrape).</p></div>",
+        unsafe_allow_html=True,
+    )
+
+    render_workflow_section()
+    st.divider()
+    render_data_stats(df)
+    st.divider()
+    render_analyser(df, badge_fn=badge_fn, on_rerun=on_rerun)
+
+    if show_legacy_details and legacy_details_fn:
+        st.divider()
+        legacy_details_fn()
