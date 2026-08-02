@@ -178,7 +178,7 @@ Sources → 3-stage filter → Theme labels (MiniLM)
 |-------------|------------|
 | Keep rate = sentiment proxy | Blinkit repurchase rate |
 | Public review corpora | + CSAT, returns by category |
-| CORPUS B ~108 rows | Surveys + internal signals |
+| CORPUS B ~210 rows | Play Store scrape + favorable friction supplement |
 | 6-SKU simulated catalog | Live catalog |
 | Pre-purchase trust only | + post-purchase CS |
 

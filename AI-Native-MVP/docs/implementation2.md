@@ -240,27 +240,34 @@ When `analysis_meta.confidence === "low"`:
 
 ---
 
-## Phase 8E — CORPUS B expansion (Should)
+## Phase 8E — CORPUS B expansion (Should) ✅
 
 **Arindam angle:** “Available data” — expanding B from committed scrape is **good**; live fetch is not required.
 
-Target 200+ rows; time-box 3h. If fail, deck states n=108 with honesty.
+Target 200+ rows; achieved **210 rows** (66 Play Store pipeline + 144 friction supplement tiers).
+
+Build: `python scripts/build_mvp_corpus.py --max-positive 300 --min-rows 200`
+
+Supplement tiers (read-only from CORPUS A):
+1. Strict favorable themes in expansion categories
+2. Non-negative themes in electronics / beauty / pharmacy
+3. General category + product keywords
+4. Other keep categories (pet, baby, home, intimate)
 
 ---
 
-## Phase 8F — Catalog & filter polish (Should)
+## Phase 8F — Catalog & filter polish (Should) ✅
 
-Unchanged. Prefer **remove broken chips** over fake filter behavior.
+Removed non-functional category filter chips (Earbuds, Skincare, etc.) — they did not filter the catalog. Home tiles without a live category show a **Soon** badge (Pharmacy, Toys).
 
 ---
 
-## Phase 8G — Deploy hygiene
+## Phase 8G — Deploy hygiene ✅
 
-Add:
-
-- [ ] README or Streamlit header: **3 links** (Link A, Link B UI, Link B API)  
-- [ ] Pre-warm Render before eval  
-- [ ] Verify Streamlit deployed from Grad-Project `main`
+- [x] `README.md` (Link A + Link B UI + API) in `Data-Extraction/` and `AI-Native-MVP/`
+- [x] Streamlit sidebar: three demo links
+- [x] `scripts/prewarm-render.sh` + `verify-deploy.sh` pre-warm before smoke tests
+- [x] Streamlit Cloud: deploy from Grad-Project `main`, path `Data-Extraction/app.py` (documented in README)
 
 ---
 

@@ -54,30 +54,6 @@ export const HOME_CATEGORIES = [
   },
 ] as const;
 
-export const ELECTRONICS_FILTERS = [
-  "All Items",
-  "Earbuds",
-  "Smartwatches",
-  "Cables & Chargers",
-] as const;
-
-export const BEAUTY_FILTERS = [
-  "All Items",
-  "Skincare",
-  "Makeup",
-  "Grooming",
-  "Essentials",
-] as const;
-
-const CATEGORY_FILTER_MAP: Record<string, readonly string[]> = {
-  electronics: ELECTRONICS_FILTERS,
-  personal_care_beauty: BEAUTY_FILTERS,
-};
-
-export function getCategoryFilters(slug: string): readonly string[] {
-  return CATEGORY_FILTER_MAP[slug] ?? ["All Items"];
-}
-
 export interface StitchProductVisual {
   /** Grid / card thumbnail */
   listImage?: string;

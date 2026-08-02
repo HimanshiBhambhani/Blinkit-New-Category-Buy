@@ -80,7 +80,7 @@ Category strip → PDP (keep proxy* + badge) → **See how** (themes + snippets 
 ## Slide 6 — AI-native pipeline
 
 ```
-CORPUS A (1,504 friction) + CORPUS B (~108 favorable)
+CORPUS A (1,504 friction) + CORPUS B (~210 favorable)
         ↓ theme classification (MiniLM embeddings — offline)
         ↓ deterministic trust score (60/40 blend + product delta)
         ↓ Link B UI (See how = mini analyser)
@@ -150,7 +150,7 @@ Link A **finds** trust problem → Link B **operationalizes** it
 |-----------|-----------------|
 | Keep rate = review proxy | Blinkit repurchase / return rate |
 | Trust from public reviews | + CSAT, return rate by category |
-| CORPUS B thin (~108 rows) | Internal post-purchase surveys |
+| CORPUS B supplement (~210 rows) | Play Store 4–5★ scrape + friction favorable rows |
 | Simulated 6-SKU catalog | Live catalog API |
 | Pre-purchase only | + post-purchase CS loop |
 

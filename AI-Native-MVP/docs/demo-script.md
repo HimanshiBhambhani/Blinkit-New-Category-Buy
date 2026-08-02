@@ -90,7 +90,7 @@ Save as PNG, compress if PDF >40MB.
 | Question | Answer |
 |----------|--------|
 | Why not use Blinkit data? | MVP uses public reviews; production moat is repurchase/return wiring |
-| Why is CORPUS B small? | Favorable supplement only; disclosed in deck + API note |
+| Why is CORPUS B smaller than A? | Favorable supplement only (~210 rows); disclosed in deck + API `corpus_b_count` |
 | Why boAt “Safe to repeat” but low trust category? | Badge uses product-level signals + keep proxy + confidence rules |
 | Can evaluator run everything? | Yes — three URLs, no login |
 | What’s AI-native? | Embeddings classify reviews; deterministic scoring; auditable evidence in UI |

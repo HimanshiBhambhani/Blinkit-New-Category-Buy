@@ -114,7 +114,7 @@ Three layers — **never mix without labels:**
 └─────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────┐
 │ Layer 2 — THIN / ESTIMATED (disclose confidence)        │
-│ • CORPUS B (~108 rows) — favorable supplement           │
+│ • CORPUS B (~210 rows) — favorable supplement           │
 │ • Brand mention counts (often low n)                    │
 │ • Category fallback when n < 3 → “Low sample” UI        │
 └─────────────────────────────────────────────────────────┘
@@ -178,7 +178,7 @@ clamped to [12, 92]
 ```
 
 - **CORPUS A** (n≈1,504): friction themes  
-- **CORPUS B** (n≈108+): favorable supplement  
+- **CORPUS B** (n≈210): favorable supplement (66 scraped + 144 friction supplement)  
 
 **UI label:** **Category Trust Score**
 

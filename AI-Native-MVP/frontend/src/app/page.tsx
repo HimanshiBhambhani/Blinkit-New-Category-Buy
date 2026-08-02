@@ -53,9 +53,12 @@ export default function HomePage() {
               if (!cat.href) {
                 return (
                   <div
-                    className="flex aspect-square flex-col items-center justify-center rounded-xl bg-surface-bright p-3 opacity-60 shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
+                    className="relative flex aspect-square flex-col items-center justify-center rounded-xl bg-surface-bright p-3 opacity-60 shadow-[0_1px_4px_rgba(0,0,0,0.08)]"
                     key={cat.slug}
                   >
+                    <span className="absolute right-2 top-2 rounded-full bg-surface-container-highest px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant">
+                      Soon
+                    </span>
                     {tile}
                   </div>
                 );

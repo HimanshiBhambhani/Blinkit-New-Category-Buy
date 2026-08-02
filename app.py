@@ -963,6 +963,14 @@ with st.sidebar:
         label_visibility="collapsed",
     )
 
+    st.divider()
+    st.caption("Graduation demo — all three links")
+    st.markdown(
+        "- **Link A** — Discovery Engine (this app)\n"
+        "- [Link B — Buy Smart UI](https://ai-native-mvp.vercel.app)\n"
+        "- [Link B — Trust API](https://buy-smart-api.onrender.com/api/health)"
+    )
+
 # Load data (cache cleared + st.rerun on analyser Re-run reloads CSV fresh)
 try:
     df = load_data()

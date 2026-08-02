@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import sys
 from pathlib import Path
 
@@ -44,6 +45,38 @@ MVP_OUTPUT_COLUMNS = [
 ]
 
 FAVORABLE_THEMES = {"Positive Experience", "Trust & Brand Verification"}
+
+KEEP_CATEGORIES = {
+    "electronics",
+    "personal_care_beauty",
+    "pet",
+    "baby",
+    "home_cleaning",
+    "intimate_personal",
+    "pharmacy_health",
+}
+
+EXPANSION_CATEGORIES = {"electronics", "personal_care_beauty", "pharmacy_health"}
+
+NEGATIVE_THEMES = {
+    "Warranty & Return Anxiety",
+    "Counterfeit / Fake Products",
+    "Product Quality Issues",
+    "Customer Support Failures",
+    "Dark Store Storage Concerns",
+}
+
+NON_FAVORABLE_THEMES = NEGATIVE_THEMES | {
+    "Neutral / No Signal",
+    "Category Unawareness",
+    "Search & Navigation Friction",
+}
+
+PRODUCT_KEYWORDS = re.compile(
+    r"electronic|earbud|headphone|speaker|beauty|skincare|makeup|serum|"
+    r"moisturiz|boat|jbl|apple|cerave|lipstick|shampoo|realme|samsung|noise",
+    re.I,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -134,37 +167,79 @@ def _build_scrape_tiers(combined: pd.DataFrame, run_cleaning_pipeline, classify_
     return scrape_df
 
 
-def _load_favorable_supplement(existing_texts: set[str]) -> pd.DataFrame:
-    """Read-only favorable expansion rows from CORPUS A (never writes back)."""
+def _normalize_supplement_rows(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    for col in MVP_OUTPUT_COLUMNS:
+        if col not in out.columns:
+            out[col] = ""
+    return out[MVP_OUTPUT_COLUMNS].copy()
+
+
+def _load_favorable_supplement(
+    existing_texts: set[str],
+    min_needed: int = 0,
+) -> pd.DataFrame:
+    """Read-only favorable expansion rows from CORPUS A (never writes back).
+
+    Tier 1 — strict favorable themes in expansion categories.
+    Tier 2 — non-negative themes in electronics / beauty / pharmacy.
+    Tier 3 — general-category rows with product keywords (expansion signal).
+    """
     if not FRICTION_CORPUS.exists():
         logger.warning("friction_corpus.csv missing — skipping supplement.")
         return pd.DataFrame(columns=MVP_OUTPUT_COLUMNS)
 
     friction = pd.read_csv(FRICTION_CORPUS)
-    keep = {
-        "electronics",
-        "personal_care_beauty",
-        "pet",
-        "baby",
-        "home_cleaning",
-        "intimate_personal",
-        "pharmacy_health",
-    }
-    fav = friction[
-        friction["Target Category"].isin(keep)
+    seen = set(existing_texts)
+    chunks: list[pd.DataFrame] = []
+
+    tier1 = friction[
+        friction["Target Category"].isin(KEEP_CATEGORIES)
         & (
             friction["Primary Theme"].isin(FAVORABLE_THEMES)
             | (friction["Friction Pillar"] == "Positive Experience")
         )
     ].copy()
-    fav = fav[~fav["Raw Content"].astype(str).isin(existing_texts)]
+    tier1 = tier1[~tier1["Raw Content"].astype(str).isin(seen)]
+    chunks.append(_normalize_supplement_rows(tier1))
+    seen.update(tier1["Raw Content"].astype(str))
+    logger.info("Supplement tier 1 (strict favorable): %d rows.", len(tier1))
 
-    for col in MVP_OUTPUT_COLUMNS:
-        if col not in fav.columns:
-            fav[col] = ""
+    tier2 = friction[
+        friction["Target Category"].isin(EXPANSION_CATEGORIES)
+        & ~friction["Primary Theme"].isin(NON_FAVORABLE_THEMES)
+    ].copy()
+    tier2 = tier2[~tier2["Raw Content"].astype(str).isin(seen)]
+    chunks.append(_normalize_supplement_rows(tier2))
+    seen.update(tier2["Raw Content"].astype(str))
+    logger.info("Supplement tier 2 (expansion non-negative): %d rows.", len(tier2))
 
-    supplement = fav[MVP_OUTPUT_COLUMNS].copy()
-    logger.info("Favorable supplement from friction corpus: %d rows.", len(supplement))
+    tier3 = friction[
+        (friction["Target Category"] == "general")
+        & friction["Raw Content"].astype(str).str.contains(PRODUCT_KEYWORDS, na=False)
+        & ~friction["Primary Theme"].isin(NEGATIVE_THEMES)
+    ].copy()
+    tier3 = tier3[~tier3["Raw Content"].astype(str).isin(seen)]
+    chunks.append(_normalize_supplement_rows(tier3))
+    seen.update(tier3["Raw Content"].astype(str))
+    logger.info("Supplement tier 3 (general + product keywords): %d rows.", len(tier3))
+
+    other_keep = KEEP_CATEGORIES - EXPANSION_CATEGORIES
+    tier4 = friction[
+        friction["Target Category"].isin(other_keep)
+        & ~friction["Primary Theme"].isin(NON_FAVORABLE_THEMES)
+    ].copy()
+    tier4 = tier4[~tier4["Raw Content"].astype(str).isin(seen)]
+    chunks.append(_normalize_supplement_rows(tier4))
+    logger.info("Supplement tier 4 (other keep categories): %d rows.", len(tier4))
+
+    supplement = pd.concat(chunks, ignore_index=True)
+    supplement = supplement.drop_duplicates(subset=["Raw Content"], keep="first")
+    logger.info(
+        "Favorable supplement from friction corpus: %d rows (needed ≥%d).",
+        len(supplement),
+        min_needed,
+    )
     return supplement
 
 
@@ -215,7 +290,8 @@ def build_mvp_corpus(max_positive: int = 200, min_rows: int = 100) -> pd.DataFra
     scrape_out = _finalize_scrape_rows(classified, config, identify_themes)
 
     existing = set(scrape_out["Raw Content"].astype(str))
-    supplement = _load_favorable_supplement(existing)
+    min_supplement = max(0, min_rows - len(scrape_out))
+    supplement = _load_favorable_supplement(existing, min_needed=min_supplement)
     output = pd.concat([scrape_out, supplement], ignore_index=True)
     output = output.drop_duplicates(subset=["Raw Content"], keep="first")
 
