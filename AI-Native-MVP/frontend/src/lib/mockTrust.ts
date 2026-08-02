@@ -5,7 +5,12 @@ export const MOCK_CATEGORIES: CategoryTrust[] = [
     category: "electronics",
     label: "Electronics",
     trust_score: 51,
+    category_trust_score: 51,
     review_count: 380,
+    reviews_analysed: 380,
+    corpus_a_count: 353,
+    corpus_b_count: 27,
+    analysis_note: "Category-level score from 353 friction (CORPUS A) + 27 favorable (CORPUS B) reviews",
     guidance: "Start repeat habits with known brands under ₹2k",
     top_concern: "Warranty & Return Anxiety",
   },
@@ -13,7 +18,9 @@ export const MOCK_CATEGORIES: CategoryTrust[] = [
     category: "personal_care_beauty",
     label: "Beauty & Personal Care",
     trust_score: 45,
+    category_trust_score: 45,
     review_count: 177,
+    reviews_analysed: 177,
     guidance: "Start repeat habits with known brands under ₹2k",
     top_concern: "Dark Store Storage Concerns",
   },
@@ -29,8 +36,9 @@ export const MOCK_PRODUCTS: Record<string, ProductCard[]> = {
       emoji: "🎧",
       category: "electronics",
       keep_rate: 81,
-      badge: "Verify warranty · See how →",
-      trust_score: 51,
+      badge: "Safe to repeat · See how →",
+      trust_score: 59,
+      confidence: "high",
     },
     {
       product_id: "jbl-go-3",
@@ -40,8 +48,9 @@ export const MOCK_PRODUCTS: Record<string, ProductCard[]> = {
       emoji: "🔊",
       category: "electronics",
       keep_rate: 75,
-      badge: "Verify warranty · See how →",
+      badge: "Category estimate · See how →",
       trust_score: 51,
+      confidence: "low",
     },
     {
       product_id: "apple-earpods",
@@ -52,7 +61,8 @@ export const MOCK_PRODUCTS: Record<string, ProductCard[]> = {
       category: "electronics",
       keep_rate: 88,
       badge: "Safe to repeat · See how →",
-      trust_score: 55,
+      trust_score: 59,
+      confidence: "medium",
     },
     {
       product_id: "realme-buds",
@@ -63,7 +73,8 @@ export const MOCK_PRODUCTS: Record<string, ProductCard[]> = {
       category: "electronics",
       keep_rate: 72,
       badge: "Verify warranty · See how →",
-      trust_score: 48,
+      trust_score: 55,
+      confidence: "medium",
     },
   ],
   personal_care_beauty: [
@@ -75,8 +86,9 @@ export const MOCK_PRODUCTS: Record<string, ProductCard[]> = {
       emoji: "🧴",
       category: "personal_care_beauty",
       keep_rate: 78,
-      badge: "Check seal · See how →",
-      trust_score: 45,
+      badge: "Category estimate · See how →",
+      trust_score: 47,
+      confidence: "low",
     },
     {
       product_id: "minimalist-serum",
@@ -86,35 +98,69 @@ export const MOCK_PRODUCTS: Record<string, ProductCard[]> = {
       emoji: "💧",
       category: "personal_care_beauty",
       keep_rate: 70,
-      badge: "Verify batch · See how →",
-      trust_score: 42,
+      badge: "Verify warranty · See how →",
+      trust_score: 46,
+      confidence: "medium",
+    },
+  ],
+};
+
+const BOAT_MOCK_DETAIL: ProductTrust = {
+  product_id: "boat-airdopes-141",
+  name: "boAt Airdopes 141",
+  brand: "boat",
+  price: 1299,
+  category: "electronics",
+  replacement_days: 7,
+  warranty: "1 year manufacturer warranty",
+  emoji: "🎧",
+  keep_rate: 81,
+  trust_score: 59,
+  category_trust_score: 51,
+  product_delta: 8,
+  positive_pct: 50,
+  mention_count: 16,
+  display_n: 16,
+  badge: "Safe to repeat · See how →",
+  confidence: "high",
+  tips: [
+    "Known brand — lower counterfeit risk on Blinkit",
+    "Record unboxing video — 12 mentions cite return/support friction",
+  ],
+  top_concern: "Warranty & Return Anxiety",
+  verdict: "Okay with caution",
+  evidence_label: "Keep-rate proxy from 16 public review mentions",
+  keep_rate_label: "Review-sentiment proxy (not Blinkit repurchase)",
+  analysis_meta: {
+    signal_level: "brand",
+    mentions: 16,
+    confidence: "high",
+    data_source: "public_reviews",
+    is_simulated_catalog: true,
+    category: "electronics",
+    brand: "boat",
+  },
+  theme_breakdown: [
+    { theme: "Warranty & Return Anxiety", count: 8 },
+    { theme: "Product Quality Issues", count: 4 },
+    { theme: "Positive Experience", count: 3 },
+  ],
+  snippets: [
+    {
+      text: "Received boAt earbuds in tampered package — charging cable missing, return denied initially.",
+      theme: "Warranty & Return Anxiety",
+      source: "Play Store",
+    },
+    {
+      text: "Good sound for the price but check warranty card inside the box on delivery.",
+      theme: "Positive Experience",
+      source: "Reddit",
     },
   ],
 };
 
 export const MOCK_PRODUCT_DETAIL: Record<string, ProductTrust> = {
-  "boat-airdopes-141": {
-    product_id: "boat-airdopes-141",
-    name: "boAt Airdopes 141",
-    brand: "boat",
-    price: 1299,
-    category: "electronics",
-    replacement_days: 7,
-    warranty: "1 year manufacturer warranty",
-    emoji: "🎧",
-    keep_rate: 81,
-    trust_score: 51,
-    positive_pct: 50,
-    mention_count: 16,
-    badge: "Verify warranty · See how →",
-    tips: [
-      "Known brand — lower counterfeit risk on Blinkit",
-      "Record unboxing video — helps if you need a return",
-    ],
-    top_concern: "Warranty & Return Anxiety",
-    verdict: "Buy with checks — see warranty",
-    evidence_label: "Based on 16 public review mentions",
-  },
+  "boat-airdopes-141": BOAT_MOCK_DETAIL,
 };
 
 export function mockCategory(slug: string): CategoryTrust | undefined {
@@ -130,16 +176,31 @@ export function mockProduct(id: string): ProductTrust | undefined {
   for (const list of Object.values(MOCK_PRODUCTS)) {
     const card = list.find((p) => p.product_id === id);
     if (card) {
+      const low = card.confidence === "low";
       return {
         ...card,
         replacement_days: 7,
         warranty: "1 year manufacturer warranty",
         positive_pct: 50,
-        mention_count: 12,
+        mention_count: low ? 2 : 12,
+        category_trust_score: card.trust_score - (low ? 0 : 4),
+        product_delta: low ? 0 : 4,
         tips: ["Check return policy before opening", "Keep packaging for warranty claims"],
         top_concern: "Warranty & Return Anxiety",
         verdict: "Buy with checks — see warranty",
-        evidence_label: "Based on public review mentions",
+        evidence_label: low
+          ? "Category keep-rate proxy (no brand-specific mentions)"
+          : "Based on public review mentions",
+        keep_rate_label: "Review-sentiment proxy (not Blinkit repurchase)",
+        analysis_meta: {
+          signal_level: low ? "category" : "brand",
+          mentions: low ? 2 : 12,
+          confidence: card.confidence ?? "medium",
+          data_source: "public_reviews",
+          is_simulated_catalog: true,
+        },
+        theme_breakdown: [{ theme: "Warranty & Return Anxiety", count: 3 }],
+        snippets: [],
       };
     }
   }

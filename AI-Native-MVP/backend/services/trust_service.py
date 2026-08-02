@@ -94,6 +94,7 @@ def list_products_for_category(category: str) -> list[dict] | None:
                 "keep_rate": trust["keep_rate"],
                 "badge": trust["badge"],
                 "trust_score": trust["trust_score"],
+                "confidence": trust["analysis_meta"]["confidence"],
             }
         )
     return cards

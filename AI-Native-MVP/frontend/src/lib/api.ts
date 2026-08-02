@@ -37,7 +37,10 @@ export async function getProducts(category: string): Promise<ProductCard[]> {
 
 export async function getProduct(id: string): Promise<ProductTrust | null> {
   const data = await fetchJson<ProductTrust>(`/api/trust/product/${id}`);
-  return data ?? mockProduct(id) ?? null;
+  if (data) return data;
+  const mock = mockProduct(id);
+  if (mock) return { ...mock, demo_mode: true };
+  return null;
 }
 
 export function formatPrice(price: number): string {

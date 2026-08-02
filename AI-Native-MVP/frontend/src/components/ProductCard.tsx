@@ -9,6 +9,11 @@ interface ProductCardProps {
   product: ProductCard;
 }
 
+function cardKeepLabel(product: ProductCard): string {
+  const est = product.confidence === "low" ? " (est.)" : "";
+  return `${product.keep_rate}% keep*${est}`;
+}
+
 export function ProductCardItem({ product }: ProductCardProps) {
   const visual = getProductVisual(product.product_id);
   const mrp = visual?.mrp ?? Math.round(product.price * 1.4);
@@ -39,7 +44,7 @@ export function ProductCardItem({ product }: ProductCardProps) {
         <div>
           <div className="mb-1 flex items-center gap-0.5 text-caps text-secondary">
             <Icon filled name="thumb_up" size={12} />
-            <span>{product.keep_rate}% keep*</span>
+            <span>{cardKeepLabel(product)}</span>
           </div>
           <div className="flex items-end justify-between gap-1">
             <div className="min-w-0">

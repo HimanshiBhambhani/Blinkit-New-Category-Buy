@@ -1,4 +1,5 @@
 import { Icon } from "@/components/Icon";
+import { formatKeepRate } from "@/lib/trustFormat";
 import type { ProductTrust } from "@/lib/types";
 
 interface TrustRowProps {
@@ -20,7 +21,7 @@ export function TrustRow({ product }: TrustRowProps) {
       <span className="text-surface-variant">|</span>
       <span className="inline-flex items-center gap-0.5">
         <Icon name="thumb_up" size={14} />
-        {product.keep_rate}% keep this*
+        {formatKeepRate(product)} keep this*
       </span>
     </div>
   );
