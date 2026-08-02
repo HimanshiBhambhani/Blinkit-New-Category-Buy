@@ -160,18 +160,18 @@ class RAGChatbot:
         self.conversation_history = []
 
         self._n = len(df)
-        self._cats = ", ".join(sorted(df["Target Category"].unique()))
+        self._cats = ", ".join(sorted([str(c) for c in df["Target Category"].dropna().unique() if isinstance(c, str) and c.strip()]))
         self._top_pil = (
-            df["Friction Pillar"].value_counts().index[0]
-            if "Friction Pillar" in df.columns else "N/A"
+            df["Friction Pillar"].dropna().value_counts().index[0]
+            if "Friction Pillar" in df.columns and not df["Friction Pillar"].dropna().empty else "N/A"
         )
         self._sources = (
-            ", ".join(sorted(df["Source"].unique()))
+            ", ".join(sorted([str(s) for s in df["Source"].dropna().unique() if isinstance(s, str) and s.strip()]))
             if "Source" in df.columns else "N/A"
         )
-        self._cat_dist = dict(df["Target Category"].value_counts())
+        self._cat_dist = dict(df["Target Category"].dropna().value_counts())
         self._pil_dist = (
-            dict(df["Friction Pillar"].value_counts())
+            dict(df["Friction Pillar"].dropna().value_counts())
             if "Friction Pillar" in df.columns else {}
         )
         self._sys = _SYS_PROMPT.format(

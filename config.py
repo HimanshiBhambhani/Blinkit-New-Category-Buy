@@ -163,6 +163,9 @@ FRICTION_PILLARS = [
     "Quality & Authenticity Risk",
     "Discovery Blind Spots",
     "Immediate Value Disconnection",
+    "Positive Experience",
+    "Unverified Source",
+    "Neutral / No Signal",
 ]
 
 # ─────────────────────────── Output Schema ───────────────────
@@ -173,6 +176,7 @@ OUTPUT_COLUMNS = [
     "Friction Pillar",
     "Raw Content",
     "Opportunity",
+    "Primary Theme",
 ]
 
 PLATFORM = "Blinkit"
@@ -187,6 +191,41 @@ SOURCE_LABELS = {
     "YouTube": "YouTube",
     "PissedConsumer": "PissedConsumer",
     "play_store_live": "Play Store (Live)",
+    "play_store_positive": "Play Store (4-5 Star)",
     "appstore_live": "App Store (Live)",
     "reddit_live": "Reddit (Live)",
 }
+
+# ─────────────────────────── Embedding Relevance Filter ──────
+# Anchor texts define "what a relevant review looks like".
+# Reviews are kept only if semantically close to at least one anchor.
+RELEVANCE_ANCHORS = [
+    # Electronics friction
+    "Blinkit sells fake electronics, I got counterfeit earbuds that stopped working",
+    "I ordered a charger from Blinkit but the quality was terrible compared to Amazon",
+    "Didn't know Blinkit sells electronics, I only use it for groceries",
+    # Beauty / Personal care friction
+    "The skincare products on Blinkit might be expired or duplicate, I don't trust them",
+    "Blinkit beauty products are overpriced compared to Nykaa and Amazon",
+    "I never explore beauty category on Blinkit, only buy groceries from there",
+    # Pet care friction
+    "Blinkit doesn't stock good pet food brands, very limited options for dogs",
+    "I didn't know Blinkit has pet supplies, the app never showed me",
+    # Baby products friction
+    "Baby products on Blinkit have no return policy, what if the size doesn't fit",
+    # Cross-shopping inertia (general)
+    "I only use Blinkit for groceries and snacks, never tried other categories",
+    "Quick commerce is only for urgent grocery needs, for other stuff I use Amazon",
+    "Blinkit should show more non-grocery categories, I had no idea they sell electronics",
+    # Price comparison friction
+    "Why would I buy electronics on Blinkit when Amazon has better prices and reviews",
+    "Blinkit charges MRP while Amazon and Flipkart give discounts on the same products",
+    # Trust / authenticity friction
+    "I don't trust Blinkit for expensive items, what if it's fake and they don't refund",
+    "How can I verify if products on Blinkit are genuine, there are no customer reviews",
+]
+
+# Minimum cosine similarity to nearest anchor (0.0 to 1.0)
+# Lower = more permissive, Higher = stricter
+# 0.25 is conservative; increase to 0.30 if still seeing junk
+RELEVANCE_THRESHOLD = 0.25

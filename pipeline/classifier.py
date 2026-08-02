@@ -99,7 +99,7 @@ def _classify_single(text: str, source: str, rating: str, category: str) -> dict
         logger.warning("Classification failed for text: %.50s... Error: %s", text, e)
         return {
             "target_category": category or "general",
-            "friction_pillar": "Quality & Authenticity Risk",
+            "friction_pillar": "Neutral / No Signal",
             "opportunity": "Classification failed — manual review needed.",
         }
 
@@ -234,30 +234,57 @@ def classify_dataframe_offline(df: pd.DataFrame) -> pd.DataFrame:
         "Habitual Tunnel Vision": re.compile(
             r"\b(only use for grocery|never knew|just for grocery|only order groceries|"
             r"don't explore|never tried|always buy same|routine order|"
-            r"surgical|habit|stuck with grocery)\b",
+            r"surgical|habit|stuck with grocery|"
+            r"sirf\s*grocery|bas\s*grocery|kabhi\s*nahi\s*dekha|pata\s*nahi\s*tha|"
+            r"hamesha\s*same|wahi\s*order)\b",
             re.IGNORECASE,
         ),
         "Discovery Blind Spots": re.compile(
             r"\b(didn't know|had no idea|never saw|can't find|no idea|"
             r"where is|not visible|hidden|search doesn't show|"
-            r"banner|couldn't find|not aware|didn't realize)\b",
+            r"banner|couldn't find|not aware|didn't realize|"
+            r"pata\s*nahi|dikha\s*nahi|mil\s*nahi|kahan\s*hai|dhund\s*raha)\b",
             re.IGNORECASE,
         ),
         "Immediate Value Disconnection": re.compile(
             r"\b(expensive|overpriced|costly|cheaper on|amazon has|nykaa|"
             r"supertails|price|MRP|discount|pack size|small pack|"
-            r"value for money|not worth|too much|comparison)\b",
+            r"value for money|not worth|too much|comparison|"
+            r"mehenga|mehnga|sasta|paisa\s*wasool|kitna\s*mahanga|zyada\s*price)\b",
             re.IGNORECASE,
         ),
         "Quality & Authenticity Risk": re.compile(
             r"\b(fake|counterfeit|duplicate|quality|damaged|broken|expired|"
             r"warranty|authentic|original|defective|tampered|"
-            r"storage|dark store|used|refurbished|not genuine)\b",
+            r"storage|dark store|used|refurbished|not genuine|"
+            r"refund|return|exchange|wrong\s*(product|item|size)|not\s*refund|"
+            r"pathetic|worst|terrible|fraud|scam|cheated|waste|"
+            r"no\s*support|no\s*response|denied|rejected|complaint|"
+            r"kharab|galat|ganda|bekar|bakwas|nakli|asli\s*nahi)\b",
             re.IGNORECASE,
         ),
     }
 
-    def _classify_text(text: str) -> tuple[str, str]:
+    def _classify_text(text: str, signal: str = "", blinkit_verified: bool = True) -> tuple[str, str]:
+        # If not verified as Blinkit-related (Reddit with no Blinkit mention)
+        if not blinkit_verified:
+            return "Unverified Source", "Review may not be about Blinkit — needs verification."
+
+        # FIX: Grofers-only positive reviews are legacy, not about modern Blinkit
+        text_lower = text.lower()
+        _mentions_grofers = bool(re.search(r"\b(grofers|grof?ers)\b", text_lower))
+        _mentions_blinkit = bool(re.search(r"\b(blinkit|blink\s*it)\b", text_lower))
+        if _mentions_grofers and not _mentions_blinkit and signal == "positive":
+            return "Unverified Source", "Legacy Grofers review — not about current Blinkit."
+
+        # If positive signal detected and no friction keywords present
+        if signal == "positive":
+            # Double-check: does it also have friction content?
+            has_friction = any(p.search(text) for p in pillar_rules.values())
+            if not has_friction:
+                return "Positive Experience", "Positive signal — potential advocacy case study."
+
+        # Standard friction pillar assignment (try matching regardless of signal tag)
         for pillar, pattern in pillar_rules.items():
             if pattern.search(text):
                 # Generate simple opportunity
@@ -272,12 +299,19 @@ def classify_dataframe_offline(df: pd.DataFrame) -> pd.DataFrame:
                     opp += "cross-category discovery nudges and personalized recommendations."
                 return pillar, opp
 
-        return "Quality & Authenticity Risk", "Needs manual review for pillar assignment."
+        # Nothing matched — assign based on signal
+        if signal == "positive":
+            return "Positive Experience", "Positive signal — potential advocacy case study."
+
+        return "Neutral / No Signal", "No clear friction signal detected."
 
     pillars = []
     opportunities = []
-    for text in df["text"]:
-        p, o = _classify_text(str(text))
+    for idx, row in df.iterrows():
+        text = str(row.get("text", ""))
+        signal = str(row.get("_signal", ""))
+        blinkit_verified = bool(row.get("_blinkit_verified", True))
+        p, o = _classify_text(text, signal, blinkit_verified)
         pillars.append(p)
         opportunities.append(o)
 

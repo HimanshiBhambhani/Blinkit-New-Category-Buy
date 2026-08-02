@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Blinkit - See How Buy Smart Works</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#83dc63",
+                        "primary-container": "#f8cb46",
+                        "error": "#ba1a1a",
+                        "outline": "#7f7662",
+                        "on-primary-fixed": "#241a00",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#eeeeee",
+                        "on-tertiary-fixed-variant": "#404942",
+                        "on-surface": "#1a1c1c",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-background": "#1a1c1c",
+                        "primary": "#755b00",
+                        "on-tertiary-fixed": "#151e18",
+                        "surface-tint": "#755b00",
+                        "tertiary-container": "#c9d3ca",
+                        "primary-fixed": "#ffe08f",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e2e2e2",
+                        "on-tertiary-container": "#525b54",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary": "#576159",
+                        "background": "#f9f9f9",
+                        "on-primary-fixed-variant": "#584400",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f9f9f9",
+                        "primary-fixed-dim": "#edc13d",
+                        "secondary-container": "#9ef97c",
+                        "secondary-fixed": "#9ef97c",
+                        "secondary": "#1c6d00",
+                        "inverse-on-surface": "#f0f1f1",
+                        "surface-dim": "#dadada",
+                        "on-secondary-fixed-variant": "#135200",
+                        "inverse-primary": "#edc13d",
+                        "surface-container-low": "#f3f3f4",
+                        "on-secondary-container": "#1e7400",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#2f3131",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#bfc9c0",
+                        "on-surface-variant": "#4e4634",
+                        "tertiary-fixed": "#dbe5db",
+                        "on-secondary-fixed": "#042100",
+                        "on-primary-container": "#6e5600",
+                        "outline-variant": "#d1c5ae",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-margin": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "12px",
+                        "grid-gap": "12px",
+                        "stack-xs": "4px",
+                        "container-padding": "16px"
+                    },
+                    "fontFamily": {
+                        "body-main": ["Inter"],
+                        "headline-product-mobile": ["Inter"],
+                        "label-trust": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "price-bold": ["Inter"],
+                        "headline-product": ["Inter"],
+                        "display-header": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-main": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-product-mobile": ["16px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "label-trust": ["13px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.5px", "fontWeight": "700" }],
+                        "price-bold": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+                        "headline-product": ["18px", { "lineHeight": "22px", "fontWeight": "600" }],
+                        "display-header": ["22px", { "lineHeight": "28px", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="h-full bg-surface-container-low text-on-surface antialiased font-body-main flex justify-center items-center w-[1920px] h-[1080px] overflow-hidden m-0 p-0 absolute inset-0">
+<!-- Canvas Container -->
+<div class="relative w-full h-full flex justify-center bg-surface-container-low">
+<!-- Mobile Emulator Column -->
+<div class="w-[500px] h-full bg-surface flex flex-col relative shadow-2xl overflow-hidden z-10 border-x border-outline-variant">
+<!-- Custom Top App Bar (Back to PDP) -->
+<div class="bg-primary-container text-on-primary-container p-container-padding flex items-center shrink-0">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-black/10 transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto no-scrollbar p-container-padding flex flex-col gap-section-margin bg-surface">
+<!-- Header Area -->
+<div class="flex flex-col gap-stack-xs">
+<h1 class="font-display-header text-display-header text-on-surface">How Buy Smart works</h1>
+<p class="font-body-main text-body-main text-on-surface-variant">boAt Airdopes 141 · boat</p>
+</div>
+<!-- Main Metrics Card -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.08)] flex flex-col gap-4 border border-outline-variant">
+<!-- Score -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end">
+<span class="font-headline-product text-headline-product text-on-surface">Buy Smart Score</span>
+<span class="font-display-header text-display-header text-primary">51<span class="text-on-surface-variant text-body-main font-body-main">/100</span></span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[51%]"></div>
+</div>
+</div>
+<hr class="border-outline-variant border-t"/>
+<!-- Sub Metrics -->
+<div class="grid grid-cols-2 gap-4">
+<div class="flex flex-col gap-1">
+<span class="font-price-bold text-price-bold text-on-surface">81%</span>
+<span class="font-label-trust text-label-trust text-on-surface-variant">Keep Rate</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-price-bold text-price-bold text-on-surface">50%</span>
+<span class="font-label-trust text-label-trust text-on-surface-variant">Positive Mentions</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" style="font-variation-settings: 'FILL' 0;">info</span>
+<span class="text-[12px] text-on-surface-variant font-body-main">Based on 16 public review mentions</span>
+</div>
+</div>
+<!-- Tips & Concerns Grid -->
+<div class="flex flex-col gap-grid-gap">
+<!-- Tip Card -->
+<div class="bg-[#F0FAF0] rounded-xl p-4 border border-[#c3e6c3] flex flex-col gap-2">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<h3 class="font-headline-product-mobile text-headline-product-mobile">Buy Smart Tips</h3>
+</div>
+<ul class="list-disc pl-5 font-body-main text-body-main text-on-surface flex flex-col gap-1">
+<li>Good battery life mentioned frequently.</li>
+<li>Decent sound quality for the price point.</li>
+<li>Comfortable fit for long wear.</li>
+</ul>
+</div>
+<!-- Concern Card -->
+<div class="bg-error-container rounded-xl p-4 border border-[#ffb4ab] flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-error-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+<h3 class="font-headline-product-mobile text-headline-product-mobile">Top Concern</h3>
+</div>
+<p class="font-body-main text-body-main text-on-error-container">
+                            Microphone quality during calls in noisy environments is a common complaint.
+                        </p>
+</div>
+</div>
+<!-- Verdict -->
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_1px_4px_rgba(0,0,0,0.08)] border border-outline-variant flex flex-col gap-2">
+<h3 class="font-headline-product-mobile text-headline-product-mobile text-on-surface">Verdict</h3>
+<p class="font-body-main text-body-main text-on-surface-variant">
+                        A solid budget option for media consumption, but consider alternatives if clear call quality is your primary requirement.
+                    </p>
+</div>
+<!-- Footnote Block -->
+<div class="mt-8 pb-8 text-[12px] text-on-surface-variant border-t border-outline-variant pt-4 opacity-70">
+<p>keep rate = review proxy; production = Blinkit repurchase; trust score = 60% favorable + 40% risk</p>
+</div>
+</div>
+</div>
+</div>
+</body></html>

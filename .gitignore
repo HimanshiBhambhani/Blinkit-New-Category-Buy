@@ -27,6 +27,14 @@ Output/blinkit_clean_data.parquet
 _write_urls.py
 *.tmp
 
-# Output directory — ignore generated data but KEEP scrapes tracked for CI
+# Output directory — ignore generated data but KEEP deploy artifacts tracked
 Output/*
 !Output/scrapes/
+!Output/blinkit_clean_data.csv
+!Output/faiss_index.bin
+!Output/faiss_meta.pkl
+
+# Buy Smart MVP (AI-Native-MVP/)
+AI-Native-MVP/frontend/node_modules/
+AI-Native-MVP/frontend/.next/
+AI-Native-MVP/backend/.venv/

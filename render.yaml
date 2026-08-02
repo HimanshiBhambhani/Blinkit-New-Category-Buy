@@ -1,0 +1,19 @@
+# Render Blueprint — Buy Smart Trust API (monorepo: AI-Native-MVP/)
+services:
+  - type: web
+    name: buy-smart-api
+    runtime: python
+    rootDir: AI-Native-MVP/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: CORPUS_A_PATH
+        value: ../data/friction_corpus.csv
+      - key: CORPUS_B_PATH
+        value: ../data/mvp_trust_corpus.csv
+      - key: ALLOWED_ORIGINS
+        sync: false

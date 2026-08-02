@@ -1,0 +1,18 @@
+# Python
+backend/.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.local
+
+# Node (Phase 4–5 Lovable export)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# OS
+.DS_Store
+
+# Data — both corpora required for Render deploy
+# data/mvp_trust_corpus.csv
+# data/friction_corpus.csv

@@ -1,0 +1,322 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Blinkit - Category Electronics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface": "#f9f9f9",
+                      "error": "#ba1a1a",
+                      "outline-variant": "#d1c5ae",
+                      "primary-fixed-dim": "#edc13d",
+                      "surface-container-highest": "#e2e2e2",
+                      "secondary-container": "#9ef97c",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface-variant": "#4e4634",
+                      "inverse-surface": "#2f3131",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed": "#dbe5db",
+                      "on-error": "#ffffff",
+                      "on-background": "#1a1c1c",
+                      "surface-container-low": "#f3f3f4",
+                      "primary-container": "#f8cb46",
+                      "inverse-primary": "#edc13d",
+                      "tertiary-container": "#c9d3ca",
+                      "on-tertiary-fixed-variant": "#404942",
+                      "on-secondary-container": "#1e7400",
+                      "on-primary-fixed": "#241a00",
+                      "surface-tint": "#755b00",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#584400",
+                      "outline": "#7f7662",
+                      "surface-variant": "#e2e2e2",
+                      "on-tertiary-container": "#525b54",
+                      "primary": "#755b00",
+                      "secondary-fixed-dim": "#83dc63",
+                      "surface-container-high": "#e8e8e8",
+                      "surface-bright": "#f9f9f9",
+                      "surface-dim": "#dadada",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#9ef97c",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed": "#ffe08f",
+                      "on-surface": "#1a1c1c",
+                      "tertiary": "#576159",
+                      "on-tertiary-fixed": "#151e18",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#042100",
+                      "surface-container": "#eeeeee",
+                      "on-secondary-fixed-variant": "#135200",
+                      "on-primary-container": "#6e5600",
+                      "background": "#f9f9f9",
+                      "inverse-on-surface": "#f0f1f1",
+                      "tertiary-fixed-dim": "#bfc9c0",
+                      "secondary": "#1c6d00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-margin": "24px",
+                      "stack-md": "12px",
+                      "grid-gap": "12px",
+                      "stack-sm": "8px",
+                      "container-padding": "16px",
+                      "stack-xs": "4px"
+              },
+              "fontFamily": {
+                      "headline-product-mobile": [
+                              "Inter"
+                      ],
+                      "price-bold": [
+                              "Inter"
+                      ],
+                      "body-main": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "label-trust": [
+                              "Inter"
+                      ],
+                      "headline-product": [
+                              "Inter"
+                      ],
+                      "display-header": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-product-mobile": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "price-bold": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-main": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "letterSpacing": "0.5px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-trust": [
+                              "13px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-product": [
+                              "18px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-header": [
+                              "22px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "800"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .skeleton {
+            animation: skeleton-loading 1s linear infinite alternate;
+        }
+        @keyframes skeleton-loading {
+            0% {
+                background-color: hsl(200, 20%, 80%);
+            }
+            100% {
+                background-color: hsl(200, 20%, 95%);
+            }
+        }
+      </style>
+</head>
+<body class="bg-surface text-on-surface font-body-main antialiased min-h-screen pb-20">
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-surface-container-lowest border-b border-surface-container-highest">
+<div class="flex items-center px-container-padding py-stack-md h-14">
+<button aria-label="Go back" class="mr-4 text-on-surface hover:bg-surface-container-low rounded-full p-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back" data-weight="regular">arrow_back</span>
+</button>
+<h1 class="font-headline-product-mobile text-headline-product-mobile text-on-surface">Electronics</h1>
+<div class="ml-auto">
+<button aria-label="Search" class="text-on-surface hover:bg-surface-container-low rounded-full p-1 transition-colors">
+<span class="material-symbols-outlined" data-icon="search" data-weight="regular">search</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Buy Smart Strip -->
+<section class="bg-[#F0FAF0] px-container-padding py-container-padding mb-section-margin">
+<div class="flex items-center gap-2 mb-2">
+<span class="font-label-caps text-label-caps text-secondary tracking-widest uppercase">BUY SMART</span>
+<div class="bg-secondary text-white font-label-caps text-[10px] px-1.5 py-0.5 rounded-sm flex items-center justify-center">
+<span class="">51</span>
+</div>
+</div>
+<p class="font-headline-product-mobile text-headline-product-mobile text-on-surface mb-1">Start repeat habits with known brands under ₹2k</p>
+<p class="font-label-trust text-label-trust text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified_user" data-weight="regular">verified_user</span>
+            Top concern: Warranty &amp; Return Anxiety
+        </p>
+</section>
+<!-- Product Grid Container -->
+<main class="px-container-padding">
+<!-- Filter Pills (Optional Contextual Layer) -->
+<div class="flex gap-2 overflow-x-auto pb-4 scrollbar-hide snap-x">
+<button class="snap-start flex-none px-4 py-1.5 rounded-full border border-secondary text-secondary bg-[#F0FAF0] font-label-trust text-label-trust whitespace-nowrap">All Items</button>
+<button class="snap-start flex-none px-4 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-label-trust text-label-trust whitespace-nowrap">Earbuds</button>
+<button class="snap-start flex-none px-4 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-label-trust text-label-trust whitespace-nowrap">Smartwatches</button>
+<button class="snap-start flex-none px-4 py-1.5 rounded-full border border-outline-variant text-on-surface-variant font-label-trust text-label-trust whitespace-nowrap">Cables &amp; Chargers</button>
+</div>
+<div class="grid grid-cols-2 gap-grid-gap" id="product-grid">
+<!-- Product Cards will be populated by JS for structural integrity -->
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-3 flex flex-col shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
+<div class="relative w-full aspect-square mb-2 bg-surface-container-low rounded-md overflow-hidden flex items-center justify-center">
+<img class="object-cover w-[80%] h-[80%]" data-alt="A clean, brightly lit product shot of modern, white wireless earbuds resting in their open charging case against a stark white background. High contrast, sharp focus, minimalistic corporate e-commerce aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXj6zxOFRfDo1dCM-TsW7q9oLwgJjGDDmIjs3nvDkgB8raYaM1ezOfTQDx4Cs1OTEV9dteRmeBA9KILgSxPgJfQM_PmU1RfLWoyNLAj71JQOisRup8c1jDleJPy0GqndlvrtmnxtzTP8KjgcHdLVP_JSfLLxwLjgYYXhFG4lSMHN9NDKmyXAg3_B6TS_JyyerZgJZ_yFxS4fD6YRwfbYMYqIl36-DaJDXCFDaJcoZ1bdhWiuWY1gBLHW5imEEraKmE">
+
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="font-body-main text-body-main text-on-surface line-clamp-2 leading-tight mb-1">boAt Airdopes 141 True Wireless Earbuds</h3>
+<div class="text-[10px] text-on-surface-variant mb-2">White, 1 Unit</div>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-secondary mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="thumb_up" data-weight="fill">thumb_up</span>
+                            81% keep*
+                         </div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-price-bold text-price-bold text-on-surface">₹1,299</span>
+<span class="text-[10px] text-on-surface-variant line-through">₹4,490</span>
+</div>
+<button class="bg-secondary text-white font-headline-product-mobile text-headline-product-mobile px-4 py-1.5 rounded-full uppercase border border-secondary shadow-sm active:scale-95 transition-transform">ADD</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-3 flex flex-col shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
+<div class="relative w-full aspect-square mb-2 bg-surface-container-low rounded-md overflow-hidden flex items-center justify-center">
+<img class="object-cover w-[80%] h-[80%]" data-alt="A sleek, black smartwatch with a silicone strap displayed prominently against a pure white background. The watch face shows a bright, colorful fitness tracking interface. Crisp lighting, high-end consumer electronics style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCefarWCZXXP4MCftMWRVUwg4lmfZgQj1Wf37v1O1_fgmyjOuiK1ST53HAWt3U5YsIM1yu043TI5uxIWtWvaNfgdyuTdxxWgdRkVGjJd2XvHvJ0r41aVBgcED_rdhHwr-nCIHiotPZmvTeShkdnQZOYDloj3ATexIYYZtDoHvT4wLko3ST8T0XJGAxCKuB1Z_9H73nEFaPrdSJW9O9kpfdxgCNOYETAGTKKDjHELtFlF6slgeY0PzE">
+
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="font-body-main text-body-main text-on-surface line-clamp-2 leading-tight mb-1">Noise ColorFit Pro 4 Advanced Smartwatch</h3>
+<div class="text-[10px] text-on-surface-variant mb-2">Jet Black, 1 Unit</div>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-secondary mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="thumb_up" data-weight="fill">thumb_up</span>
+                            92% keep*
+                         </div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-price-bold text-price-bold text-on-surface">₹1,999</span>
+<span class="text-[10px] text-on-surface-variant line-through">₹5,999</span>
+</div>
+<button class="bg-secondary text-white font-headline-product-mobile text-headline-product-mobile px-4 py-1.5 rounded-full uppercase border border-secondary shadow-sm active:scale-95 transition-transform">ADD</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-lg p-3 flex flex-col shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
+<div class="relative w-full aspect-square mb-2 bg-surface-container-low rounded-md overflow-hidden flex items-center justify-center">
+<img class="object-cover w-[80%] h-[80%]" data-alt="A neatly coiled, braided USB-C to Lightning cable in a muted grey color, shot from a top-down angle on a pristine white surface. Minimalist, functional product photography with soft shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUzm9MnFoH1bOUDU_rgpCtF6PRqhCgWXZMDPm4BlaHBNPGPLWZUPaPi5vEeTV-Y3hK2yRyWz23lKZsoRjTGrd36JnJzVKRT574AQsHqOo6fkdhPAtf-Rt22vzq5EChgiMGITaidEmOECc5ESYju0exqcseBg5218LndI-NHf0HIl2UJNn9lp90_JgW4vvUkQgZKhYaWphc0CIbFfuR_zlXsrIGhDmhdqCXrETvSOOMbZOCAhBp8IQ">
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="font-body-main text-body-main text-on-surface line-clamp-2 leading-tight mb-1">Ambrane 20W Type-C to Lightning Cable</h3>
+<div class="text-[10px] text-on-surface-variant mb-2">1.5m, Braided</div>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-secondary mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="thumb_up" data-weight="fill">thumb_up</span>
+                            75% keep*
+                         </div>
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-price-bold text-price-bold text-on-surface">₹299</span>
+<span class="text-[10px] text-on-surface-variant line-through">₹799</span>
+</div>
+<!-- Added State -->
+<div class="flex items-center bg-surface-container-lowest border border-secondary rounded-full overflow-hidden h-8 w-20 shadow-sm">
+<button class="flex-1 flex items-center justify-center text-secondary h-full bg-surface-container-lowest active:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="remove">remove</span>
+</button>
+<span class="font-headline-product-mobile text-headline-product-mobile text-on-surface px-1">1</span>
+<button class="flex-1 flex items-center justify-center text-secondary h-full bg-surface-container-lowest active:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 4 Skeleton -->
+<div class="bg-surface-container-lowest rounded-lg p-3 flex flex-col shadow-[0_1px_4px_rgba(0,0,0,0.08)]"><div class="relative w-full aspect-square mb-2 bg-surface-container-low rounded-md overflow-hidden flex items-center justify-center"><img alt="Ambrane 10000mAh Power Bank" class="object-cover w-[80%] h-[80%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZihrn8atZaD02oNgaZxorMx87481slQG0K84wzzdQejzAwG7PfJsTmtzZ14dKjdxac9SiTejZ9mQNmlj-GPLVKs8xCFmD4jJ6FrYPlOAxnGOW4wsCa8q0L5czD113b5vBQT-7tyW6BNp_y-yt3VYH6J6Fb2GnXY9KfqsvSiv0SKWc7XJ8wyWbmkk9v9fLdZoHTnap58C6uye6mzCzNy3JheC56MlOoXZHEMtrWZrzFOaMDDs8GvVda0Ocbr753GEF"></div><div class="flex-1 flex flex-col justify-between"><div><h3 class="font-body-main text-body-main text-on-surface line-clamp-2 leading-tight mb-1">Ambrane 10000mAh Power Bank</h3><div class="text-[10px] text-on-surface-variant mb-2">Black, 1 Unit</div></div><div><div class="font-label-caps text-label-caps text-secondary mb-1 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="thumb_up" data-weight="fill">thumb_up</span>78% keep*</div><div class="flex items-center justify-between"><div class="flex flex-col"><span class="font-price-bold text-price-bold text-on-surface">₹899</span><span class="text-[10px] text-on-surface-variant line-through">₹1,499</span></div><button class="bg-secondary text-white font-headline-product-mobile text-headline-product-mobile px-4 py-1.5 rounded-full uppercase border border-secondary shadow-sm active:scale-95 transition-transform">ADD</button></div></div></div></div>
+</div>
+</main>
+<!-- Bottom Nav Bar generated from JSON -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 bg-surface dark:bg-inverse-surface z-50 border-t border-outline-variant dark:border-outline shadow-lg dark:shadow-none">
+<!-- Categories is active based on Intent -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high p-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home" data-weight="regular">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed active:scale-95 transition-transform p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1 text-secondary" data-icon="grid_view" data-weight="fill" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="font-label-caps text-label-caps font-bold">Categories</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high p-2 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="shopping_cart" data-weight="regular">shopping_cart</span>
+<span class="font-label-caps text-label-caps">Cart</span>
+</a>
+</nav>
+
+
+
+
+
+
+</body></html>

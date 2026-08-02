@@ -28,6 +28,7 @@ import config
 from ingestion import load_all_historical
 from pipeline.filters import run_cleaning_pipeline
 from pipeline.classifier import classify_dataframe, classify_dataframe_offline
+from engine.themes import identify_themes
 
 logging.basicConfig(
     level=logging.INFO,
@@ -62,6 +63,9 @@ def _finalize_output(df: pd.DataFrame) -> pd.DataFrame:
     df["Platform"] = config.PLATFORM
     df["Raw Content"] = df["text"]
 
+    # Identify themes before writing to CSV (pre-bake into output)
+    df = identify_themes(df)
+
     # Select and order output columns
     output = df[config.OUTPUT_COLUMNS].copy()
 
@@ -76,9 +80,11 @@ def run_pipeline(
     include_live_playstore: bool = False,
     include_live_appstore: bool = False,
     include_live_reddit: bool = False,
+    include_positive_playstore: bool = False,
     classify_mode: str = "offline",
     max_playstore: int = 500,
     max_appstore: int = 200,
+    max_positive_per_star: int = 250,
 ) -> pd.DataFrame:
     """
     Execute the full pipeline end-to-end.
@@ -87,9 +93,11 @@ def run_pipeline(
         include_live_playstore: Whether to scrape live Play Store reviews
         include_live_appstore: Whether to scrape live App Store reviews
         include_live_reddit: Whether to scrape live Reddit threads
+        include_positive_playstore: Whether to scrape 4-5 star Play Store reviews
         classify_mode: 'ai' for Groq classification, 'offline' for rule-based
         max_playstore: Max Play Store reviews to scrape
         max_appstore: Max App Store reviews to scrape
+        max_positive_per_star: Max 4/5-star reviews to scrape per star rating
 
     Returns:
         Final cleaned, classified DataFrame in output schema format.
@@ -139,6 +147,23 @@ def run_pipeline(
             )
         except Exception as e:
             logger.error("App Store scraping failed: %s", e)
+
+    # ──── Pathway A: Positive Play Store (4-5 star) ────
+    if include_positive_playstore:
+        try:
+            from scrapers.playstore import scrape_playstore_positive
+
+            positive_ps = scrape_playstore_positive(max_per_star=max_positive_per_star)
+            if not positive_ps.empty:
+                all_dfs.append(positive_ps)
+                logger.info("Positive Play Store: %d reviews scraped (4-5 star).", len(positive_ps))
+        except ImportError:
+            logger.error(
+                "google-play-scraper not installed. "
+                "Run: pip install google-play-scraper"
+            )
+        except Exception as e:
+            logger.error("Positive Play Store scraping failed: %s", e)
 
     # ──── Pathway B: Live Reddit ────
     if include_live_reddit:
@@ -205,6 +230,18 @@ def run_pipeline(
     except Exception:
         logger.warning("Parquet save failed (pyarrow may not be installed).")
 
+    # ──── PHASE 5: REBUILD FAISS INDEX ────
+    logger.info("")
+    logger.info("=" * 70)
+    logger.info("PHASE 5: REBUILD FAISS INDEX (embedding-filtered data)")
+    logger.info("=" * 70)
+    try:
+        from engine import build_index
+        build_index(output)
+        logger.info("FAISS index rebuilt with %d clean vectors.", len(output))
+    except Exception as e:
+        logger.warning("FAISS rebuild skipped: %s", e)
+
     # ──── Summary Stats ────
     logger.info("")
     logger.info("=" * 70)
@@ -244,6 +281,14 @@ def main():
         help="Include live Reddit scraping (requires praw + API keys in .env)"
     )
     parser.add_argument(
+        "--positive", action="store_true",
+        help="Scrape 4-5 star Play Store reviews (satisfied-with-caveats users)"
+    )
+    parser.add_argument(
+        "--max-positive", type=int, default=250,
+        help="Max positive reviews per star rating (default: 250, so up to 500 total)"
+    )
+    parser.add_argument(
         "--classify", choices=["ai", "offline"], default="offline",
         help="Classification mode: 'ai' (Groq LLM) or 'offline' (rule-based, default)"
     )
@@ -258,8 +303,10 @@ def main():
         include_live_playstore=args.live,
         include_live_appstore=args.live or args.appstore,
         include_live_reddit=args.reddit,
+        include_positive_playstore=args.positive,
         classify_mode=args.classify,
         max_playstore=args.max_playstore,
+        max_positive_per_star=args.max_positive,
     )
 
     if output.empty:

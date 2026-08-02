@@ -1,0 +1,336 @@
+================================================================================
+BLINKIT GROWTH PROJECT — PROBLEM STATEMENT
+Next Leap PM Graduation Project | Deadline: 4 Aug 2026
+================================================================================
+
+1. CONTEXT
+----------
+Company:  Blinkit (Indian quick-commerce, ~10-minute delivery)
+Role:     Product Manager — Growth Team
+Goal:     Increase cross-category shopping among existing users
+
+North Star Metric:
+  Increase the % of Monthly Active Customers (MAC) who purchase from at least
+  ONE NEW non-grocery category every month.
+
+  Example: User who only buys groceries also buys electronics or beauty
+  that month → counts toward growth.
+
+
+2. TARGET USER — CAUTIOUS DABBLERS
+----------------------------------
+Who:
+  - Use Blinkit 2–3x/week for groceries
+  - Tried non-grocery once or twice but do NOT repeat
+  - Not fully churned — just need a reason to trust and come back
+  - Mental default: "Amazon for non-grocery, Blinkit for urgent groceries"
+
+Research base:
+  - 6 user interviews (primary evidence)
+  - 1,505 cleaned public reviews (AI analysis corpus)
+  - Google Form (45 responses) — used for interview recruitment only
+
+Key interview voices:
+  - Manushri: "Default setting in your head moves to Amazon"
+  - Sarthak:  Will retry if urgent OR low-ticket known brand; return worked
+  - Sayra:    Pet/protein work on Blinkit; urgency stops price comparison
+  - Shrishti: ₹11k HDD failed; CS ghosted — pre-purchase signals did not help
+
+
+3. PROBLEM (AFTER RESEARCH PIVOT)
+---------------------------------
+Initial AI hypothesis:
+  Users don't know Blinkit sells non-grocery → discovery problem.
+
+Validated finding:
+  Users already KNOW Blinkit sells non-grocery → TRUST problem.
+
+Root cause:
+  Blinkit is seen as "kaam-chalau" — last-minute convenience for small
+  urgent items, not a quality destination for non-grocery.
+
+  IMPORTANT: Urgency is how people use Blinkit TODAY — it is NOT the habit
+  we want to reinforce. Telling users "only order when urgent" keeps them
+  stuck in grocery-only emergency mode and does not move MAC cross-category.
+
+User pain:
+  "Should I risk buying this on Blinkit?" — mental tax before every
+  non-grocery purchase → they don't repeat → MAC cross-category stays flat.
+
+Current workarounds:
+  - Amazon: planned buys, reviews, returns
+  - Nykaa: beauty
+  - Blinkit: often tried once under urgency — but never becomes a repeat habit
+
+
+4. PROPOSED SOLUTION — BUY SMART
+--------------------------------
+An AI-powered trust layer inside the Blinkit app (simulated MVP for evaluators).
+
+Purpose: Help Cautious Dabblers build REPEAT non-grocery habits on Blinkit —
+not reinforce "only use Blinkit when desperate."
+
+NOT a chatbot. NOT a recommendation engine. NOT competitor price comparison.
+NOT an "urgency-only" message — that would spoil the whole growth goal.
+
+What users see:
+  Category page  → Buy Smart strip (trust score + category guidance)
+  Product page   → replacement | warranty | % keep this product*
+                   + price-tier badge + "See how →"
+  Trust sheet    → trust score, keep rate detail, positive mentions %,
+                   tips, top concern, mention count (tap "See how")
+
+  PDP shows KEEP RATE only. Positive mentions % and trust score breakdown
+  live in the trust sheet — not on the main product line.
+
+Example PDP:
+  boAt Airdopes 141   ₹1,299
+  7-day replacement | 1 year warranty | 81% keep this product*
+  ✅ Safe to repeat · See how →
+
+  * Keep rate estimated from public review signals. Production uses Blinkit
+    repurchase data.
+
+Example "See how" sheet:
+  Trust score: 71
+  81% keep this product
+  62% positive mentions in our data
+  Based on 47 public review mentions (boAt · electronics)
+  Tips + top concern from friction corpus
+  * Keep rate = review proxy in MVP. Production: Blinkit repurchase data.
+
+Price-tier badges (supportive — never anti-Blinkit):
+  ≤ ₹2,000     → "Safe to repeat · See how →"
+  ₹2,001–5,000 → "Verify warranty · See how →"
+  > ₹5,000     → "Check return policy · See how →"
+
+  Never use: "Not a safe buy", "Skip", "Don't buy on Blinkit", "Use Amazon"
+
+Buy Smart paths — REPEAT & HABIT (what we promote in MVP copy):
+  A) Known brand + low ticket (under ~₹2,000) — safe enough to buy again monthly
+  B) Categories with proven repeat signal (pet food, protein, personal care — Sayra)
+  C) Clear return/warranty on product page — reduces risk for planned buys
+
+What we do NOT say in MVP UI:
+  X "Only order when urgent"
+  X "Need it in 10 minutes? Buy here"
+  X Speed as the primary reason to trust a category
+
+  Speed stays in Blinkit's brand (10-min delivery) — Buy Smart answers a
+  different question: "Can I make this category a habit on Blinkit?"
+
+Habit shift (the actual product goal):
+  Today:     Groceries on Blinkit + Amazon for everything else
+  First win: User tries ONE low-risk category with trust signals (not fear)
+  Repeat:    Same category again next month without re-deciding Amazon vs Blinkit
+  Expand:    One NEW category per month → MAC metric moves
+
+  Buy Smart removes the re-decision tax: "I already know electronics-on-Blinkit
+  works for boAt under ₹2k — I'll just reorder here."
+
+Research note (urgency in interviews):
+  - Urgency explains how people DISCOVERED non-grocery on Blinkit (Sayra, survey)
+  - It is input to research, NOT the MVP CTA — habit requires repeat, not one-off rush
+
+MVP cannot fix:
+  - Post-purchase CS failures (Shrishti case)
+  - High-AOV planned purchases without ops/CS improvements
+
+
+5. ASSIGNMENT DELIVERABLES
+--------------------------
+Part 1 — AI Discovery Engine (separate deploy link):
+  Scrape/clean reviews, theme classification, insights dashboard
+
+Part 2 — User Research: complete (6 interviews)
+
+Part 3 — Problem Definition: this document
+
+Part 4 — AI-Native MVP (separate deploy link):
+  Next.js in-app prototype + backend trust API from real review data
+
+Submission:
+  - 10-slide deck (PDF, no name, ≤40MB)
+  - Link A: AI Discovery Engine
+  - Link B: Buy Smart MVP
+
+
+6. DATA HONESTY (REQUIRED IN DECK)
+---------------------------------
+- Review corpus is friction-focused (complaint bias) — risk themes are signals,
+  not overall customer satisfaction
+- Trust score = weighted blend of CORPUS A (40% risk) + CORPUS B (60% favorable)
+  — shown in See how sheet, not headline cheerleading
+- Keep rate on PDP = REVIEW PROXY (Option A): favorable theme ratio on
+  brand/category mentions via compute_keep_rate() — NOT hardcoded dummy values
+  NOT Blinkit internal repurchase data in MVP
+- Positive mentions % = CORPUS B only — See how sheet, not PDP
+- Product catalog in MVP is simulated — not live Blinkit API
+- Production: same UI; Blinkit swaps review proxy for internal repurchase metric
+
+Keep rate proxy logic (MVP):
+  1. Match reviews to product by brand + category
+  2. AI-classified themes (embedding model) → favorable vs negative count
+  3. keep_rate = favorable / total mentions (clamped 35–85%)
+  4. Fallback: ≥3 brand mentions = brand proxy; fewer = category estimate
+  5. Show mention count in See how for transparency
+
+
+7. DUAL DATA STRATEGY — DISCOVERY ENGINE vs MVP (IMPORTANT)
+-----------------------------------------------------------
+We use TWO separate review datasets. Do NOT merge them into the AI Analyser.
+
+CORPUS A — AI Discovery Engine (Link A) — UNCHANGED
+  Purpose:  Find friction, themes, root causes, PM insights
+  Source:   Existing pipeline (~1,505 reviews, ≤4-star bias by design)
+  Filter:   Stage 2 keeps complaint/mixed reviews; drops generic 5-star praise
+  Used by:  Streamlit Discovery Engine only
+  Why keep as-is: Adding positive reviews would dilute friction signals and
+  weaken the "trust not discovery" research story.
+
+CORPUS B — Buy Smart MVP (Link B) — POSITIVE SUPPLEMENT
+  Purpose:  Consumer-facing trust scores that feel fair and balanced
+  Source:   Scrape 4-star + 5-star Play Store reviews (separate pipeline run)
+  Filter:   Same category isolation (non-grocery only) + embedding relevance
+            Drop generic "great app fast delivery" with no category signal
+  Used by:  FastAPI trust API + Next.js MVP only
+  File:     data/mvp_trust_corpus.csv (separate from blinkit_clean_data.csv)
+
+How to extract (existing code in Data-Extraction):
+  cd ../Data-Extraction
+  python main.py --positive --max-positive 200 --classify offline
+  → Then export MVP-only CSV OR run a dedicated script that:
+     1) Scrapes 4–5 star reviews (scrapers/playstore.py — scrape_playstore_positive)
+     2) Applies Stage 3 category filter + Stage 4 embedding relevance
+     3) Does NOT apply Stage 2 low-star filter
+     4) Saves to AI-Native-MVP/data/mvp_trust_corpus.csv
+
+Score logic for MVP (locked approach):
+  TRUST SCORE (See how sheet):
+    trust_score = baseline + (0.6 × favorable_from_CORPUS_B)
+                              − (0.4 × risk_from_CORPUS_A)
+    Uses BOTH corpora — weighted theme signals, not raw star counts or row merge
+
+  KEEP RATE (PDP + sheet):
+    Review proxy from classified mentions (see Section 6) — not hardcoded
+
+  POSITIVE MENTIONS % (See how only):
+    From CORPUS B
+
+  TIPS & TOP CONCERN (See how):
+    From CORPUS A (friction themes) — honest risks, not pure cheerleading
+
+  Each signal has a job — do not collapse into one opaque number.
+
+Deck must say:
+  "Discovery Engine = friction corpus. Buy Smart trust score blends 60% favorable
+   4–5★ signals with 40% friction risk themes. Keep rate is a review proxy in MVP;
+   production uses Blinkit repurchase data."
+
+What makes this AI-native (not just a trust score):
+  - Embedding theme classification (all-MiniLM-L6-v2) on review corpus
+  - Semantic brand/category matching — not keyword rules alone
+  - FAISS-retrieved review evidence in See how sheet (optional)
+  - Dynamic tips from classified friction themes per product
+  - Discovery Engine (Link A) finds trust problem; MVP (Link B) operationalizes it
+
+Do NOT:
+  - Add positive reviews into blinkit_clean_data.csv used by Discovery Engine
+  - Present MVP scores as "official Blinkit CSAT"
+  - Hide that two corpora exist — state it openly in deck (shows PM rigour)
+
+
+8. SUCCESS METRICS (DECK SLIDE 7)
+---------------------------------
+North star (business outcome):
+  Increase % of Monthly Active Customers (MAC) who purchase from at least ONE
+  NEW non-grocery category per month.
+
+  Example: Grocery-only user also buys electronics or beauty that month → counts.
+
+Leading indicators (experiment — would run with Blinkit analytics):
+  - Buy Smart category strip CTR (% who tap or scroll past strip on category page)
+  - "See how" tap rate on PDP (% who open trust sheet after seeing badge)
+  - Add-to-cart rate on badged SKUs vs non-badged control in same category
+
+Proxy metrics (MVP / graduation demo — measurable in prototype):
+  - User completes PDP → See how flow without bounce (qualitative demo script)
+  - Evaluator can verify scores change when corpus updates (not hardcoded)
+
+Habit outcome (production — requires Blinkit internal data):
+  - 30-day repeat purchase rate in same non-grocery category
+  - Share of MAC with 2+ non-grocery orders in rolling 30 days
+  - Category expansion: users adding a NEW category vs repeat in existing one
+
+Hypothesis to test:
+  "If we reduce pre-purchase re-decision tax with transparent trust signals,
+   Cautious Dabblers will repeat non-grocery purchases on Blinkit instead of
+   defaulting back to Amazon — moving MAC cross-category over 8–12 weeks."
+
+What we are NOT claiming in MVP:
+  - Proven lift on MAC (no live A/B in graduation build)
+  - Keep rate equals actual repurchase (review proxy only — labeled in UI)
+
+
+9. LIMITATIONS & PRODUCTION PATH (DECK SLIDE 9)
+-----------------------------------------------
+Known limitations (state openly — builds evaluator trust):
+
+  A) Data & scoring
+     - Public review corpus is complaint-biased (CORPUS A) — good for risks,
+       not for overall satisfaction
+     - CORPUS B (4–5★ scrape) is thin on expansion-category praise — most
+       Play Store positives are grocery delivery praise; MVP supplements with
+       tier-2 recovery + read-only favorable rows from A (documented in pipeline)
+     - Trust score and keep rate can diverge (e.g. strong brand keep rate but
+       high category friction) — See how sheet must explain both signals
+     - Positive mentions % is theme-based, not star-count cheerleading
+
+  B) Product scope
+     - MVP catalog is simulated — not live Blinkit API or real inventory
+     - Pre-purchase trust only — cannot fix post-purchase CS failures (Shrishti:
+       ₹11k HDD, ghosted support). High-AOV needs ops/CS investment alongside UI
+     - No Amazon / Nykaa price comparison by design — trust ≠ cheapest
+
+  C) User experience guardrails (when NOT to show Buy Smart strongly)
+     - Grocery-only sessions — do not badge staple SKUs
+     - <3 brand mentions — label as "category estimate" in evidence footnote
+     - Price > ₹5,000 — emphasize return policy, not "Safe to repeat"
+
+Production swap (same UI, better data — no redesign required):
+
+  | MVP field           | Today (graduation)              | Production (Blinkit)              |
+  |---------------------|---------------------------------|-----------------------------------|
+  | keep_rate           | Review proxy (compute_keep_rate)| Internal repurchase / return rate |
+  | trust_score         | 60/40 public review themes      | + CSAT, return rate, QC by category|
+  | positive_pct        | CORPUS B theme ratio            | Post-purchase NPS by category     |
+  | mention_count       | Public review text matches      | Order volume + review volume      |
+  | tips / top_concern  | CORPUS A friction themes        | + support ticket themes (internal)|
+  | evidence_label      | "Based on N public mentions"    | "Based on Blinkit purchase data"  |
+
+Post-MVP product roadmap (habit loop — not in Aug 4 scope):
+  - Re-order nudge: "You bought boAt here 3 weeks ago — safe to repeat"
+  - Category habit streak: "2nd electronics order on Blinkit this month"
+  - Post-delivery trust check-in for first non-grocery order in a category
+
+Deck one-liner for limitations slide:
+  "MVP uses public review proxies with full transparency. Production swaps data
+   sources behind the same API — Blinkit repurchase metrics, not a UI rebuild."
+
+
+10. DECK STRUCTURE (10 SLIDES — SEE docs/deck-outline.md)
+---------------------------------------------------------
+  1. Title + north star
+  2. Cautious Dabbler + interview quote
+  3. Research pivot (Discovery Engine / Link A)
+  4. Problem — trust not discovery
+  5. Buy Smart solution (Link B screenshot)
+  6. AI-native layer (signals table)
+  7. Success metrics (Section 8 above)
+  8. Wedge & rollout (≤₹2k known brand first)
+  9. Limitations & production path (Section 9 above)
+  10. Roadmap + submission links (Link A + Link B)
+
+Full slide copy and speaker notes: docs/deck-outline.md
+
+================================================================================

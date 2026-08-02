@@ -84,3 +84,79 @@ def scrape_playstore_all(max_reviews: int = 500) -> pd.DataFrame:
     combined = pd.concat(all_dfs, ignore_index=True)
     logger.info("Total live Play Store reviews scraped: %d", len(combined))
     return combined
+
+
+def scrape_playstore_positive(
+    max_per_star: int = 250,
+) -> pd.DataFrame:
+    """
+    Scrape 4-star and 5-star Play Store reviews for Blinkit.
+
+    These capture "satisfied-with-caveats" users who reveal inertia signals:
+    why they stay despite friction, what almost made them leave, and what
+    competitors they considered.
+
+    Args:
+        max_per_star: Maximum reviews to pull per star rating (4 and 5).
+
+    Returns:
+        DataFrame with columns: [source_raw, date, rating, text, url]
+    """
+    all_rows = []
+
+    for star in (4, 5):
+        logger.info(
+            "Fetching up to %d Play Store reviews with rating=%d for %s ...",
+            max_per_star, star, config.PLAY_STORE_PACKAGE,
+        )
+        token = None
+        fetched = 0
+
+        while fetched < max_per_star:
+            batch_size = min(config.PLAY_STORE_BATCH_SIZE, max_per_star - fetched)
+            try:
+                result, token = reviews(
+                    config.PLAY_STORE_PACKAGE,
+                    lang=config.PLAY_STORE_LANG,
+                    country=config.PLAY_STORE_COUNTRY,
+                    sort=Sort.NEWEST,
+                    count=batch_size,
+                    filter_score_with=star,
+                    continuation_token=token,
+                )
+            except Exception as e:
+                logger.error("Play Store scrape error (star=%d): %s", star, e)
+                break
+
+            if not result:
+                break
+
+            for r in result:
+                all_rows.append(
+                    {
+                        "source_raw": "play_store_positive",
+                        "date": str(r.get("at", "")),
+                        "rating": r.get("score", star),
+                        "text": r.get("content", ""),
+                        "url": f"https://play.google.com/store/apps/details?id={config.PLAY_STORE_PACKAGE}",
+                    }
+                )
+
+            fetched += len(result)
+            if token is None:
+                break
+
+        logger.info("Fetched %d reviews with rating=%d.", fetched, star)
+
+    if not all_rows:
+        logger.warning("No positive Play Store reviews returned.")
+        return pd.DataFrame(columns=["source_raw", "date", "rating", "text", "url"])
+
+    df = pd.DataFrame(all_rows)
+    logger.info(
+        "Total positive Play Store reviews: %d (4-star: %d, 5-star: %d)",
+        len(df),
+        len(df[df["rating"] == 4]),
+        len(df[df["rating"] == 5]),
+    )
+    return df
