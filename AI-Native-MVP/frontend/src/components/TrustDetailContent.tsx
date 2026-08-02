@@ -103,47 +103,29 @@ export function TrustDetailContent({ product }: TrustDetailContentProps) {
         </div>
       </div>
 
-      {product.theme_breakdown && product.theme_breakdown.length > 0 ? (
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-3 shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
-          <h2 className="mb-2 text-headline-sm text-on-surface">Theme breakdown</h2>
-          <p className="mb-3 text-trust text-on-surface-variant">
-            What our classifier found in review text for this brand / category.
-          </p>
-          <ul className="space-y-2">
-            {product.theme_breakdown.map((item) => (
-              <li
-                className="flex items-center justify-between gap-2 text-body text-on-surface"
-                key={item.theme}
-              >
-                <span className="min-w-0 flex-1 truncate">{item.theme}</span>
-                <span className="shrink-0 rounded-sm bg-surface-container-high px-1.5 py-0.5 text-caps text-on-surface-variant">
-                  {item.count}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
       {product.snippets && product.snippets.length > 0 ? (
         <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-3 shadow-[0_1px_4px_rgba(0,0,0,0.08)]">
-          <h2 className="mb-2 text-headline-sm text-on-surface">Review evidence</h2>
+          <h2 className="mb-2 text-headline-sm text-on-surface">What shoppers say</h2>
           <p className="mb-3 text-trust text-on-surface-variant">
-            Verbatim excerpts from our public review corpus — not AI-generated.
+            {product.snippets_note ??
+              "Positive Blinkit reviews that mention this exact product — not AI-generated."}
           </p>
           <ul className="space-y-3">
             {product.snippets.map((snippet, index) => (
               <li
-                className="border-l-2 border-primary pl-3 text-body italic text-on-surface-variant"
-                key={`${snippet.theme}-${index}`}
+                className="border-l-2 border-secondary pl-3 text-body text-on-surface"
+                key={`snippet-${index}`}
               >
                 &ldquo;{snippet.text}&rdquo;
-                <p className="mt-1 not-italic text-caps text-on-surface-variant/80">
-                  {snippet.theme} · {snippet.source}
-                </p>
+                <p className="mt-1 text-caps text-on-surface-variant/80">{snippet.source}</p>
               </li>
             ))}
           </ul>
+        </div>
+      ) : product.snippets_note ? (
+        <div className="rounded-xl border border-outline-variant bg-surface-container-low p-3">
+          <h2 className="mb-1 text-headline-sm text-on-surface">What shoppers say</h2>
+          <p className="text-trust text-on-surface-variant">{product.snippets_note}</p>
         </div>
       ) : null}
 

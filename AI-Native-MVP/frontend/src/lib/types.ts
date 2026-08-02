@@ -10,14 +10,8 @@ export interface AnalysisMeta {
   brand?: string;
 }
 
-export interface ThemeBreakdownItem {
-  theme: string;
-  count: number;
-}
-
 export interface ReviewSnippet {
   text: string;
-  theme: string;
   source: string;
 }
 
@@ -63,7 +57,7 @@ export interface ProductTrust extends ProductCard {
   evidence_label: string;
   keep_rate_label?: string;
   analysis_meta?: AnalysisMeta;
-  theme_breakdown?: ThemeBreakdownItem[];
   snippets?: ReviewSnippet[];
+  snippets_note?: string;
   demo_mode?: boolean;
 }

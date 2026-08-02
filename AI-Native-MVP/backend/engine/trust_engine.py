@@ -102,6 +102,18 @@ PRODUCT_CATALOG: dict[str, list[dict]] = {
     ],
 }
 
+# Product-specific keywords for evidence snippets (exact-SKU matching).
+PRODUCT_EVIDENCE_TERMS: dict[str, list[str]] = {
+    "boat-airdopes-141": ["airdopes", "141"],
+    "jbl-go-3": ["jbl go", "go 3", "go3"],
+    "apple-earpods": ["earpod", "earpods"],
+    "realme-buds": ["t310", "realme bud", "buds t310"],
+    "cerave-moisturizer": ["cerave", "moisturizing cream", "moisturiz"],
+    "minimalist-serum": ["minimalist", "niacinamide", "serum"],
+}
+
+BLINKIT_SOURCES = {"Play Store", "Historical Dump"}
+
 CATEGORY_LABELS = {
     "electronics": "Electronics",
     "personal_care_beauty": "Beauty & Personal Care",
@@ -379,31 +391,111 @@ def _verdict(trust_score: int) -> str:
     return "Buy with checks — see warranty"
 
 
+def _product_search_terms(product: dict) -> list[str]:
+    terms = PRODUCT_EVIDENCE_TERMS.get(product["id"], [])
+    if terms:
+        return terms
+    # Fallback: distinctive tokens from catalog name (skip generic words).
+    skip = {"with", "and", "the", "for", "usb-c", "unit", "black", "blue"}
+    tokens = re.findall(r"[a-z0-9]+", product["name"].lower())
+    return [t for t in tokens if len(t) > 3 and t not in skip][:4]
+
+
+def _is_blinkit_context(row: pd.Series) -> bool:
+    text = str(row.get("Raw Content", row.get("text", ""))).lower()
+    if "blinkit" in text:
+        return True
+    if str(row.get("Platform", "")).strip().lower() == "blinkit":
+        return True
+    if str(row.get("Source", "")).strip() == "Play Store":
+        return True
+    return False
+
+
+def _is_positive_review(row: pd.Series) -> bool:
+    theme = str(row.get("Primary Theme", ""))
+    pillar = str(row.get("Friction Pillar", ""))
+    if theme in NEGATIVE_THEMES:
+        return False
+    return theme == POSITIVE_THEME or pillar == "Positive Experience"
+
+
+def _product_evidence_rows(
+    df_a: pd.DataFrame,
+    df_b: pd.DataFrame,
+    product: dict,
+    category: str,
+) -> pd.DataFrame:
+    """Positive, product-specific, Blinkit-context reviews only."""
+    brand = product["brand"]
+    terms = _product_search_terms(product)
+    brand_pat = re.compile(re.escape(brand), re.IGNORECASE)
+    term_pats = [re.compile(re.escape(t), re.IGNORECASE) for t in terms]
+
+    frames = []
+    for df in (df_b, df_a):
+        if df.empty:
+            continue
+        col = _text_column(df)
+        subset = df[df["Target Category"] == category].copy()
+        text_series = subset[col].astype(str)
+        brand_mask = text_series.str.contains(brand_pat, na=False)
+        if term_pats:
+            term_mask = text_series.apply(
+                lambda t: any(p.search(t) for p in term_pats)
+            )
+        else:
+            term_mask = True
+        subset = subset[brand_mask & term_mask]
+        subset = subset[subset.apply(_is_positive_review, axis=1)]
+        subset = subset[subset.apply(_is_blinkit_context, axis=1)]
+        if len(subset) > 0:
+            frames.append(subset)
+
+    if not frames:
+        return pd.DataFrame()
+
+    combined = pd.concat(frames, ignore_index=True)
+    if combined.empty:
+        return combined
+    col = _text_column(combined)
+    return combined.drop_duplicates(subset=[col], keep="first")
+
+
 def theme_breakdown(subset: pd.DataFrame, limit: int = 5) -> list[dict]:
-    """Theme counts for brand/category subset — auditable analyser output."""
+    """Deprecated for customer UI — kept for internal/debug use only."""
     if len(subset) == 0 or "Primary Theme" not in subset.columns:
         return []
     counts = subset["Primary Theme"].value_counts().head(limit)
     return [{"theme": str(theme), "count": int(count)} for theme, count in counts.items()]
 
 
-def review_snippets(subset: pd.DataFrame, limit: int = 2) -> list[dict]:
-    """Verbatim review excerpts from corpus rows (no LLM generation)."""
-    if len(subset) == 0:
+def review_snippets(
+    df_a: pd.DataFrame,
+    df_b: pd.DataFrame,
+    product: dict,
+    category: str,
+    limit: int = 2,
+) -> list[dict]:
+    """Positive, product-specific Blinkit review excerpts only."""
+    pool = _product_evidence_rows(df_a, df_b, product, category)
+    if len(pool) == 0:
         return []
-    col = _text_column(subset)
+
+    col = _text_column(pool)
     snippets: list[dict] = []
-    for idx, row in subset.head(limit).iterrows():
+    for _, row in pool.head(limit * 3).iterrows():
         text = str(row[col]).strip()
-        if not text:
+        if len(text) < 20:
             continue
         snippets.append(
             {
                 "text": text[:280] + ("…" if len(text) > 280 else ""),
-                "theme": str(row.get("Primary Theme", "")),
-                "source": str(row.get("Source", "public review")),
+                "source": str(row.get("Source", "Blinkit review")),
             }
         )
+        if len(snippets) >= limit:
+            break
     return snippets
 
 
@@ -522,10 +614,10 @@ def build_product_trust(
         df_a, df_b, brand, category
     )
     confidence = confidence_tier(mention_count)
-    brand_subset = _brand_reviews(df_a, brand, category)
     sub_a = df_a[df_a["Target Category"] == category]
 
     analysis_meta = build_analysis_meta(brand, category, mention_count, confidence)
+    snippets = review_snippets(df_a, df_b, product, category)
 
     payload = {
         "product_id": product["id"],
@@ -551,8 +643,15 @@ def build_product_trust(
         "verdict": _verdict(product_score),
         "evidence_label": evidence_label,
         "analysis_meta": analysis_meta,
-        "theme_breakdown": theme_breakdown(brand_subset if len(brand_subset) > 0 else sub_a),
-        "snippets": review_snippets(brand_subset if len(brand_subset) > 0 else sub_a),
+        "snippets": snippets,
+        "snippets_note": (
+            "Positive Blinkit reviews that mention this exact product."
+            if snippets
+            else (
+                "No product-specific positive Blinkit reviews in our public corpus yet. "
+                "Trust score uses category and brand signals instead."
+            )
+        ),
     }
 
     if confidence != "low":

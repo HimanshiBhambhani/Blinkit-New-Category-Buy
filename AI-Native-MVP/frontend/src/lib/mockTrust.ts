@@ -140,23 +140,9 @@ const BOAT_MOCK_DETAIL: ProductTrust = {
     category: "electronics",
     brand: "boat",
   },
-  theme_breakdown: [
-    { theme: "Warranty & Return Anxiety", count: 8 },
-    { theme: "Product Quality Issues", count: 4 },
-    { theme: "Positive Experience", count: 3 },
-  ],
-  snippets: [
-    {
-      text: "Received boAt earbuds in tampered package — charging cable missing, return denied initially.",
-      theme: "Warranty & Return Anxiety",
-      source: "Play Store",
-    },
-    {
-      text: "Good sound for the price but check warranty card inside the box on delivery.",
-      theme: "Positive Experience",
-      source: "Reddit",
-    },
-  ],
+  snippets: [],
+  snippets_note:
+    "No product-specific positive Blinkit reviews in our public corpus yet. Trust score uses category and brand signals instead.",
 };
 
 export const MOCK_PRODUCT_DETAIL: Record<string, ProductTrust> = {
@@ -199,8 +185,9 @@ export function mockProduct(id: string): ProductTrust | undefined {
           data_source: "public_reviews",
           is_simulated_catalog: true,
         },
-        theme_breakdown: [{ theme: "Warranty & Return Anxiety", count: 3 }],
         snippets: [],
+        snippets_note:
+          "No product-specific positive Blinkit reviews in our public corpus yet. Trust score uses category and brand signals instead.",
       };
     }
   }
