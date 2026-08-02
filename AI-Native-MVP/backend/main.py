@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Buy Smart Trust API",
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 

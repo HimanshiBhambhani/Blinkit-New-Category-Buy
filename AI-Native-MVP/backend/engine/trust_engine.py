@@ -3,6 +3,8 @@ backend/engine/trust_engine.py — Buy Smart trust scores (dual corpus).
 
 CORPUS A (friction): risks, tips, keep-rate proxy, top concerns.
 CORPUS B (positive): favorable leg for trust score + positive mentions %.
+
+Phase 8A: category vs product scores, confidence tiers, analysis_meta.
 """
 
 from __future__ import annotations
@@ -167,6 +169,23 @@ def _clamp(score: float, lo: int = 12, hi: int = 92) -> int:
     return int(max(lo, min(hi, round(score))))
 
 
+def _text_column(df: pd.DataFrame) -> str:
+    if "Raw Content" in df.columns:
+        return "Raw Content"
+    if "text" in df.columns:
+        return "text"
+    return df.columns[0]
+
+
+def confidence_tier(mentions: int) -> str:
+    """High / medium / low from brand mention count in CORPUS A."""
+    if mentions >= 10:
+        return "high"
+    if mentions >= 3:
+        return "medium"
+    return "low"
+
+
 def _score_from_subset(subset: pd.DataFrame) -> tuple[int, float, float]:
     n = len(subset)
     if n == 0:
@@ -184,7 +203,7 @@ def compute_trust_score(
     df_b: pd.DataFrame,
     category: str,
 ) -> int:
-    """60% favorable from B, 40% risk from A — per category theme ratios."""
+    """Category Trust Score — 60% favorable B, 40% risk A."""
     sub_a = df_a[df_a["Target Category"] == category]
     sub_b = df_b[df_b["Target Category"] == category]
     _, pos_b, _ = _score_from_subset(sub_b)
@@ -195,13 +214,58 @@ def compute_trust_score(
     return _clamp(raw)
 
 
+def compute_product_delta(
+    df_a: pd.DataFrame,
+    df_b: pd.DataFrame,
+    brand: str,
+    category: str,
+    price: int,
+) -> int:
+    """
+    Product Confidence Adjustment ∈ [-12, +12] from brand signals, price band,
+    mention volume, and favorable/negative theme mix.
+    """
+    delta = 0
+    subset_a = _brand_reviews(df_a, brand, category)
+    mentions = len(subset_a)
+
+    if brand.lower() in KNOWN_BRANDS:
+        delta += 3
+    if price <= 2000:
+        delta += 2
+    elif price > 5000:
+        delta -= 2
+
+    if mentions >= 10:
+        delta += 3
+    elif mentions >= 3:
+        delta += 1
+    elif mentions == 0:
+        delta -= 3
+    else:
+        delta -= 1
+
+    pos_pct = positive_mentions_pct(df_b, brand, category)
+    if pos_pct >= 55:
+        delta += 2
+    elif pos_pct < 35:
+        delta -= 2
+
+    if mentions > 0:
+        neg = subset_a["Primary Theme"].isin(NEGATIVE_THEMES).sum()
+        if neg / mentions > 0.5:
+            delta -= 3
+
+    return max(-12, min(12, delta))
+
+
 def _brand_reviews(
     df: pd.DataFrame,
     brand: str,
     category: str | None = None,
 ) -> pd.DataFrame:
     pattern = re.compile(re.escape(brand), re.IGNORECASE)
-    col = "Raw Content" if "Raw Content" in df.columns else "text"
+    col = _text_column(df)
     mask = df[col].astype(str).str.contains(pattern, na=False)
     subset = df[mask]
     if category:
@@ -237,22 +301,22 @@ def resolve_keep_rate(
     brand: str,
     category: str,
 ) -> tuple[int, int, str]:
-    """Keep rate with fallback tiers: ≥3 / 1–2 / 0 brand mentions."""
+    """Keep rate proxy with fallback tiers: ≥3 / 1–2 / 0 brand mentions."""
     subset = _brand_reviews(df_a, brand, category)
     rate, mentions = compute_keep_rate(subset)
 
     if mentions >= 3 and rate is not None:
-        return rate, mentions, f"Based on {mentions} public review mentions"
+        return rate, mentions, f"Keep-rate proxy from {mentions} public review mentions"
 
     if mentions >= 1:
         cat_subset = df_a[df_a["Target Category"] == category]
         cat_rate, _ = compute_keep_rate(cat_subset)
         if cat_rate is None:
             cat_rate = _category_favorable_rate_b(df_b, category)
-        return cat_rate, mentions, f"Category estimate ({mentions} brand mentions)"
+        return cat_rate, mentions, f"Category keep-rate proxy ({mentions} brand mentions)"
 
     cat_rate = _category_favorable_rate_b(df_b, category)
-    return cat_rate, 0, "Category estimate (no brand-specific mentions)"
+    return cat_rate, 0, "Category keep-rate proxy (no brand-specific mentions)"
 
 
 def positive_mentions_pct(
@@ -269,9 +333,22 @@ def positive_mentions_pct(
     return round(100 * pos / max(len(subset), 1), 1)
 
 
-def compute_badge(price: int, brand: str, trust_score: int) -> str:
+def compute_badge(
+    price: int,
+    brand: str,
+    product_trust: int,
+    keep_rate: int,
+    confidence: str,
+) -> str:
     known = brand.lower() in KNOWN_BRANDS
-    if price <= 2000 and known and trust_score >= 60:
+    if confidence == "low":
+        badge = "Category estimate · See how →"
+    elif (
+        price <= 2000
+        and known
+        and product_trust >= 55
+        and keep_rate >= 70
+    ):
         badge = "Safe to repeat · See how →"
     elif price <= 5000:
         badge = "Verify warranty · See how →"
@@ -300,6 +377,52 @@ def _verdict(trust_score: int) -> str:
     if trust_score >= 55:
         return "Okay with caution"
     return "Buy with checks — see warranty"
+
+
+def theme_breakdown(subset: pd.DataFrame, limit: int = 5) -> list[dict]:
+    """Theme counts for brand/category subset — auditable analyser output."""
+    if len(subset) == 0 or "Primary Theme" not in subset.columns:
+        return []
+    counts = subset["Primary Theme"].value_counts().head(limit)
+    return [{"theme": str(theme), "count": int(count)} for theme, count in counts.items()]
+
+
+def review_snippets(subset: pd.DataFrame, limit: int = 2) -> list[dict]:
+    """Verbatim review excerpts from corpus rows (no LLM generation)."""
+    if len(subset) == 0:
+        return []
+    col = _text_column(subset)
+    snippets: list[dict] = []
+    for idx, row in subset.head(limit).iterrows():
+        text = str(row[col]).strip()
+        if not text:
+            continue
+        snippets.append(
+            {
+                "text": text[:280] + ("…" if len(text) > 280 else ""),
+                "theme": str(row.get("Primary Theme", "")),
+                "source": str(row.get("Source", "public review")),
+            }
+        )
+    return snippets
+
+
+def build_analysis_meta(
+    brand: str,
+    category: str,
+    mentions: int,
+    confidence: str,
+) -> dict:
+    signal = "brand" if mentions >= 3 else "category"
+    return {
+        "signal_level": signal,
+        "mentions": mentions,
+        "confidence": confidence,
+        "data_source": "public_reviews",
+        "is_simulated_catalog": True,
+        "category": category,
+        "brand": brand,
+    }
 
 
 def get_category_trust(
@@ -332,13 +455,24 @@ def build_category_trust(
 ) -> dict:
     """API-shaped category trust payload."""
     cat = get_category_trust(df_a, df_b, category)
+    sub_a = df_a[df_a["Target Category"] == category]
+    sub_b = df_b[df_b["Target Category"] == category]
+    n_a, n_b = len(sub_a), len(sub_b)
     return {
         "category": cat.category,
         "label": cat.label,
         "trust_score": cat.overall_score,
+        "category_trust_score": cat.overall_score,
         "review_count": cat.review_count,
+        "reviews_analysed": n_a + n_b,
+        "corpus_a_count": n_a,
+        "corpus_b_count": n_b,
         "guidance": "Start repeat habits with known brands under ₹2k",
         "top_concern": cat.top_risk,
+        "analysis_note": (
+            f"Category-level score from {n_a} friction (CORPUS A) + "
+            f"{n_b} favorable (CORPUS B) reviews"
+        ),
     }
 
 
@@ -377,16 +511,23 @@ def build_product_trust(
     product: dict,
     category: str,
 ) -> dict:
-    """Unified product response — matches architecture.md JSON contract."""
+    """Unified product response — category + product scores, confidence, evidence."""
     brand = product["brand"]
-    trust_score = compute_trust_score(df_a, df_b, category)
+    category_score = compute_trust_score(df_a, df_b, category)
+    delta = compute_product_delta(df_a, df_b, brand, category, product["price"])
+    product_score = _clamp(category_score + delta)
+
     pt = get_product_trust(df_a, product, category)
     keep_rate, mention_count, evidence_label = resolve_keep_rate(
         df_a, df_b, brand, category
     )
+    confidence = confidence_tier(mention_count)
+    brand_subset = _brand_reviews(df_a, brand, category)
     sub_a = df_a[df_a["Target Category"] == category]
 
-    return {
+    analysis_meta = build_analysis_meta(brand, category, mention_count, confidence)
+
+    payload = {
         "product_id": product["id"],
         "name": product["name"],
         "brand": brand,
@@ -395,16 +536,29 @@ def build_product_trust(
         "replacement_days": product["replacement_days"],
         "warranty": product["warranty"],
         "emoji": product.get("emoji", "📦"),
+        "category_trust_score": category_score,
+        "product_delta": delta,
+        "trust_score": product_score,
         "keep_rate": keep_rate,
-        "trust_score": trust_score,
+        "keep_rate_label": "Review-sentiment proxy (not Blinkit repurchase)",
         "positive_pct": positive_mentions_pct(df_b, brand, category),
         "mention_count": mention_count,
-        "badge": compute_badge(product["price"], brand, trust_score),
+        "badge": compute_badge(
+            product["price"], brand, product_score, keep_rate, confidence
+        ),
         "tips": pt.tips,
         "top_concern": _top_concern(sub_a),
-        "verdict": _verdict(trust_score),
+        "verdict": _verdict(product_score),
         "evidence_label": evidence_label,
+        "analysis_meta": analysis_meta,
+        "theme_breakdown": theme_breakdown(brand_subset if len(brand_subset) > 0 else sub_a),
+        "snippets": review_snippets(brand_subset if len(brand_subset) > 0 else sub_a),
     }
+
+    if confidence != "low":
+        payload["display_n"] = mention_count
+
+    return payload
 
 
 def _build_tips(subset: pd.DataFrame, brand: str) -> list[str]:
@@ -426,15 +580,17 @@ def _build_tips(subset: pd.DataFrame, brand: str) -> list[str]:
     top = theme_counts.index.tolist()[:3]
 
     if "Warranty & Return Anxiety" in top or "Customer Support Failures" in top:
-        tips.append("Record unboxing video — helps if you need a return")
+        n = int(theme_counts.get("Warranty & Return Anxiety", 0) + theme_counts.get("Customer Support Failures", 0))
+        tips.append(f"Record unboxing video — {n} mentions cite return/support friction")
     if "Counterfeit / Fake Products" in top or "Dark Store Storage Concerns" in top:
-        tips.append("Check seal and MRP sticker at delivery — refuse if tampered")
+        n = int(theme_counts.get("Counterfeit / Fake Products", 0) + theme_counts.get("Dark Store Storage Concerns", 0))
+        tips.append(f"Check seal at delivery — {n} mentions cite authenticity/storage")
     if "Product Quality Issues" in top:
-        tips.append("Test immediately on delivery — report defects within 24 hours")
+        n = int(theme_counts.get("Product Quality Issues", 0))
+        tips.append(f"Test on delivery — {n} mentions cite quality issues")
     if POSITIVE_THEME in top:
-        tips.append(
-            "Most mentions in our data are favorable for repeat buys in this category"
-        )
+        n = int(theme_counts.get(POSITIVE_THEME, 0))
+        tips.append(f"Favorable repeat-buy signals in {n} mentions for this brand")
 
     if not tips:
         tips.append("Stick to sealed products from recognizable brands")
