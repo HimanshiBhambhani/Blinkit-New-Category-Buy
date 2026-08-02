@@ -1,32 +1,79 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
-import { BLINKIT_LOGO } from "@/lib/stitchAssets";
+
+/** Real Blinkit home address from app reference */
+export const BLINKIT_HOME_ADDRESS = "home - 608 Sector 21B, NIT, Faridabad...";
+
+function BlinkitWordmark() {
+  return (
+    <span
+      aria-label="Blinkit"
+      className="select-none text-[26px] font-extrabold lowercase leading-none tracking-[-0.5px] text-[#318616]"
+    >
+      blinkit
+    </span>
+  );
+}
+
+function BannerScallop() {
+  return (
+    <svg
+      aria-hidden
+      className="absolute bottom-0 left-0 w-full translate-y-[99%] text-white"
+      height="8"
+      preserveAspectRatio="none"
+      viewBox="0 0 100 8"
+      width="100%"
+    >
+      <path
+        d="M0,0 H100 V8 Q87.5,0 75,8 Q62.5,0 50,8 Q37.5,0 25,8 Q12.5,0 0,8 Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 export function BlinkitHeader() {
   return (
-    <header className="sticky top-0 z-40 shrink-0 bg-primary-container px-container-padding pb-3 pt-3 text-on-primary-container">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="Blinkit" className="h-8 shrink-0 object-contain" src={BLINKIT_LOGO} />
-          <div className="min-w-0 flex-1">
-            <p className="text-headline-sm font-bold leading-5">Blinkit</p>
-            <div className="flex min-w-0 items-center">
-              <span className="truncate text-trust">Home - 1234, Main St...</span>
-              <Icon className="text-on-primary-container" name="keyboard_arrow_down" size={18} />
-            </div>
-          </div>
+    <header className="sticky top-0 z-40 shrink-0 bg-white shadow-[0_1px_0_rgba(0,0,0,0.06)]">
+      {/* Yellow brand banner */}
+      <div className="relative bg-[#F8CB46] px-container-padding pb-5 pt-3">
+        <div className="flex justify-center py-1">
+          <BlinkitWordmark />
         </div>
-        <Icon className="shrink-0 text-on-primary-container" filled name="account_circle" size={28} />
+        <BannerScallop />
       </div>
-      <div className="flex h-12 w-full items-center rounded-lg bg-surface-container-lowest px-3 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]">
-        <Icon className="mr-2 shrink-0 text-outline" name="search" size={22} />
-        <input
-          className="min-w-0 flex-1 border-none bg-transparent p-0 text-body text-on-surface placeholder:text-outline-variant focus:ring-0"
-          placeholder="Search 'milk'"
-          readOnly
-          type="text"
-        />
+
+      {/* Delivery + address */}
+      <div className="px-container-padding pb-2 pt-3">
+        <p className="text-[15px] font-bold leading-tight text-on-surface">
+          delivery in 10 minutes
+        </p>
+        <div className="mt-1.5 flex items-center gap-2">
+          <p className="min-w-0 flex-1 truncate text-[13px] leading-snug text-on-surface">
+            {BLINKIT_HOME_ADDRESS}
+          </p>
+          <button
+            aria-label="Change delivery address"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F8CB46] text-on-surface"
+            type="button"
+          >
+            <Icon name="arrow_forward" size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="px-container-padding pb-3">
+        <div className="flex h-12 items-center rounded-full border border-[#e8e8e8] bg-white px-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <Icon className="mr-2.5 shrink-0 text-[#9e9e9e]" name="search" size={22} />
+          <input
+            className="min-w-0 flex-1 border-none bg-transparent p-0 text-[14px] text-on-surface placeholder:text-[#9e9e9e] focus:ring-0"
+            placeholder="search for atta dal and coke and more"
+            readOnly
+            type="text"
+          />
+        </div>
       </div>
     </header>
   );
