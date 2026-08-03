@@ -10,8 +10,8 @@ export const MOCK_CATEGORIES: CategoryTrust[] = [
     reviews_analysed: 380,
     corpus_a_count: 353,
     corpus_b_count: 27,
-    analysis_note: "Category-level score from 353 friction (CORPUS A) + 27 favorable (CORPUS B) reviews",
-    guidance: "Start repeat habits with known brands under ₹2k",
+    analysis_note: "Based on 380 public Blinkit reviews in Electronics",
+    guidance: "Prefer known brands — check warranty and returns before you buy",
     top_concern: "Warranty & Return Anxiety",
   },
   {
@@ -21,7 +21,8 @@ export const MOCK_CATEGORIES: CategoryTrust[] = [
     category_trust_score: 45,
     review_count: 177,
     reviews_analysed: 177,
-    guidance: "Start repeat habits with known brands under ₹2k",
+    guidance: "Choose sealed products from brands you already trust",
+    analysis_note: "Based on 177 public Blinkit reviews in Beauty & Personal Care",
     top_concern: "Dark Store Storage Concerns",
   },
 ];
@@ -140,9 +141,15 @@ const BOAT_MOCK_DETAIL: ProductTrust = {
     category: "electronics",
     brand: "boat",
   },
-  snippets: [],
+  snippets: [
+    {
+      text:
+        "Amazing variety and fresh products! I am highly satisfied with Blinkit's service. From fresh fruits and vegetables to household items and electronics, they have everything. The quality of the products is always top-notch…",
+      source: "Historical Dump (Play Store review)",
+    },
+  ],
   snippets_note:
-    "No product-specific positive Blinkit reviews in our public corpus yet. Trust score uses category and brand signals instead.",
+    "No product-specific positive Blinkit reviews found in our public corpus. These are real category-level quotes from Blinkit shoppers.",
 };
 
 export const MOCK_PRODUCT_DETAIL: Record<string, ProductTrust> = {
@@ -185,9 +192,15 @@ export function mockProduct(id: string): ProductTrust | undefined {
           data_source: "public_reviews",
           is_simulated_catalog: true,
         },
-        snippets: [],
+        snippets: [
+          {
+            text:
+              "Really happy with the service from Blinkit. The skincare products are authentic and genuine, and the delivery was quick and smooth…",
+            source: "Historical Dump (Play Store review)",
+          },
+        ],
         snippets_note:
-          "No product-specific positive Blinkit reviews in our public corpus yet. Trust score uses category and brand signals instead.",
+          "No product-specific positive Blinkit reviews found in our public corpus. These are real category-level quotes from Blinkit shoppers.",
       };
     }
   }

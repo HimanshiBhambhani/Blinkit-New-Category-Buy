@@ -120,6 +120,62 @@ CATEGORY_LABELS = {
     "pharmacy_health": "Pharmacy & Health",
 }
 
+CATEGORY_GUIDANCE = {
+    "electronics": "Prefer known brands — check warranty and returns before you buy",
+    "personal_care_beauty": "Choose sealed products from brands you already trust",
+    "pharmacy_health": "Check expiry dates and packaging when your order arrives",
+}
+
+# Verified positive Blinkit reviews at category level (Historical Dump / Play Store).
+# Used only when no product-specific positive snippet exists in the corpus.
+CATEGORY_FALLBACK_SNIPPETS: dict[str, list[dict[str, str]]] = {
+    "electronics": [
+        {
+            "text": (
+                "Amazing variety and fresh products! I am highly satisfied with Blinkit's "
+                "service. From fresh fruits and vegetables to household items and electronics, "
+                "they have everything. The quality of the products is always top-notch, and "
+                "the automated customer support handles queries instantly. Highly recommended app!"
+            ),
+            "source": "Historical Dump (Play Store review)",
+        },
+        {
+            "text": (
+                "Very nice app Food, electronics, and things come on the time as shown in the "
+                "app. The employers are good and respectful. They work during the day as well as "
+                "at night. Such a good app I have ever seen. I literally love this app."
+            ),
+            "source": "Historical Dump (Play Store review)",
+        },
+    ],
+    "personal_care_beauty": [
+        {
+            "text": (
+                "Really happy with the service from Blinkit. The skincare products are authentic "
+                "and genuine, and the delivery was quick and smooth. The delivery person was "
+                "polite and professional. The return process was also very easy, and the refund "
+                "was processed quickly."
+            ),
+            "source": "Historical Dump (Play Store review)",
+        },
+        {
+            "text": (
+                "if I have to ordered, I order from blinkit cuz the quality of the product and "
+                "packaging is very well and I never got disappointed they built trust. I ordered "
+                "everything like snacks, facewash and everytime blinkit made me happy by their "
+                "quality of the product and packaging."
+            ),
+            "source": "Historical Dump (Play Store review)",
+        },
+    ],
+}
+
+SNIPPETS_NOTE_PRODUCT = "Positive Blinkit reviews that mention this exact product."
+SNIPPETS_NOTE_CATEGORY = (
+    "No product-specific positive Blinkit reviews found in our public corpus. "
+    "These are real category-level quotes from Blinkit shoppers."
+)
+
 BANNED_BADGE_PHRASES = (
     "not a safe buy",
     "skip",
@@ -470,17 +526,34 @@ def theme_breakdown(subset: pd.DataFrame, limit: int = 5) -> list[dict]:
     return [{"theme": str(theme), "count": int(count)} for theme, count in counts.items()]
 
 
+def _truncate_snippet(text: str, limit: int = 280) -> str:
+    text = text.strip()
+    return text[:limit] + ("…" if len(text) > limit else "")
+
+
+def _category_fallback_snippets(category: str, limit: int = 2) -> list[dict]:
+    pool = CATEGORY_FALLBACK_SNIPPETS.get(category, [])
+    return [
+        {
+            "text": _truncate_snippet(item["text"]),
+            "source": item["source"],
+        }
+        for item in pool[:limit]
+    ]
+
+
 def review_snippets(
     df_a: pd.DataFrame,
     df_b: pd.DataFrame,
     product: dict,
     category: str,
     limit: int = 2,
-) -> list[dict]:
-    """Positive, product-specific Blinkit review excerpts only."""
+) -> tuple[list[dict], str]:
+    """Product-specific positive Blinkit excerpts, then honest category fallback."""
     pool = _product_evidence_rows(df_a, df_b, product, category)
     if len(pool) == 0:
-        return []
+        fallback = _category_fallback_snippets(category, limit)
+        return fallback, "category" if fallback else "none"
 
     col = _text_column(pool)
     snippets: list[dict] = []
@@ -490,13 +563,13 @@ def review_snippets(
             continue
         snippets.append(
             {
-                "text": text[:280] + ("…" if len(text) > 280 else ""),
+                "text": _truncate_snippet(text),
                 "source": str(row.get("Source", "Blinkit review")),
             }
         )
         if len(snippets) >= limit:
             break
-    return snippets
+    return snippets, "product"
 
 
 def build_analysis_meta(
@@ -550,21 +623,23 @@ def build_category_trust(
     sub_a = df_a[df_a["Target Category"] == category]
     sub_b = df_b[df_b["Target Category"] == category]
     n_a, n_b = len(sub_a), len(sub_b)
+    total = n_a + n_b
+    label = cat.label
     return {
         "category": cat.category,
-        "label": cat.label,
+        "label": label,
         "trust_score": cat.overall_score,
         "category_trust_score": cat.overall_score,
         "review_count": cat.review_count,
-        "reviews_analysed": n_a + n_b,
+        "reviews_analysed": total,
         "corpus_a_count": n_a,
         "corpus_b_count": n_b,
-        "guidance": "Start repeat habits with known brands under ₹2k",
-        "top_concern": cat.top_risk,
-        "analysis_note": (
-            f"Category-level score from {n_a} friction (CORPUS A) + "
-            f"{n_b} favorable (CORPUS B) reviews"
+        "guidance": CATEGORY_GUIDANCE.get(
+            category,
+            "Start with familiar brands before trying something new",
         ),
+        "top_concern": cat.top_risk,
+        "analysis_note": f"Based on {total} public Blinkit reviews in {label}",
     }
 
 
@@ -617,7 +692,16 @@ def build_product_trust(
     sub_a = df_a[df_a["Target Category"] == category]
 
     analysis_meta = build_analysis_meta(brand, category, mention_count, confidence)
-    snippets = review_snippets(df_a, df_b, product, category)
+    snippets, snippet_scope = review_snippets(df_a, df_b, product, category)
+    if snippet_scope == "product":
+        snippets_note = SNIPPETS_NOTE_PRODUCT
+    elif snippet_scope == "category":
+        snippets_note = SNIPPETS_NOTE_CATEGORY
+    else:
+        snippets_note = (
+            "No positive Blinkit reviews in our public corpus for this product or category yet. "
+            "Trust score uses category and brand signals instead."
+        )
 
     payload = {
         "product_id": product["id"],
@@ -644,14 +728,7 @@ def build_product_trust(
         "evidence_label": evidence_label,
         "analysis_meta": analysis_meta,
         "snippets": snippets,
-        "snippets_note": (
-            "Positive Blinkit reviews that mention this exact product."
-            if snippets
-            else (
-                "No product-specific positive Blinkit reviews in our public corpus yet. "
-                "Trust score uses category and brand signals instead."
-            )
-        ),
+        "snippets_note": snippets_note,
     }
 
     if confidence != "low":

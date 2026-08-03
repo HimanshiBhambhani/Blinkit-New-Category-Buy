@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ConfidenceBanner, DemoModeBanner } from "@/components/ConfidenceBanner";
 import { Icon } from "@/components/Icon";
-import { LINK_A_DISCOVERY_URL } from "@/lib/trustFormat";
 import {
   confidenceBadgeLabel,
   formatKeepRate,
@@ -156,19 +155,12 @@ export function TrustDetailContent({ product }: TrustDetailContentProps) {
         <p className="text-body text-on-surface-variant">{product.verdict}</p>
       </div>
 
-      <p className="text-trust leading-relaxed text-on-surface-variant">
-        Themes classified in the{" "}
-        <Link
-          className="text-primary underline decoration-primary/30 underline-offset-2"
-          href={LINK_A_DISCOVERY_URL}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          Discovery Engine (Link A)
-        </Link>
-        . Trust scores on this page are computed <strong>deterministically</strong> from the review
-        corpus — no LLM at request time.
-      </p>
+      <Link
+        className="text-trust text-primary underline decoration-primary/30 underline-offset-2"
+        href={`/product/${product.product_id}/how-calculated`}
+      >
+        How is this score calculated?
+      </Link>
     </div>
   );
 }

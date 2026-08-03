@@ -7,6 +7,8 @@ interface BuySmartStripProps {
 
 export function BuySmartStrip({ category }: BuySmartStripProps) {
   const reviewed = category.reviews_analysed ?? category.review_count;
+  const reviewLine =
+    category.analysis_note ?? `Based on ${reviewed.toLocaleString("en-IN")} public Blinkit reviews`;
 
   return (
     <section className="shrink-0 bg-blinkit-trust-bg px-container-padding py-4">
@@ -16,13 +18,8 @@ export function BuySmartStrip({ category }: BuySmartStripProps) {
           {category.trust_score}
         </span>
       </div>
-      <p className="mb-1 text-headline-sm leading-snug text-on-surface">{category.guidance}</p>
-      <p className="mb-1 text-caps text-on-surface-variant">
-        Category Trust Score · {reviewed.toLocaleString("en-IN")} reviews analysed
-      </p>
-      {category.analysis_note ? (
-        <p className="mb-1 text-caps text-on-surface-variant/90">{category.analysis_note}</p>
-      ) : null}
+      <p className="mb-1.5 text-headline-sm leading-snug text-on-surface">{category.guidance}</p>
+      <p className="mb-1.5 text-trust text-on-surface-variant">{reviewLine}</p>
       <p className="flex items-start gap-1 text-trust text-on-surface-variant">
         <Icon className="mt-px shrink-0" name="verified_user" size={14} />
         <span>Top concern: {category.top_concern}</span>
