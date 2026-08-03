@@ -947,7 +947,13 @@ def get_patterns(_df_hash):
 #  SIDEBAR — Fluent 2 Navigation Pane
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-BLINKIT_LOGO_SVG = '<svg viewBox="0 0 120 28" width="120" height="28" xmlns="http://www.w3.org/2000/svg"><text x="0" y="22" font-family="Segoe UI Variable, Segoe UI, -apple-system, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.5"><tspan fill="#F8C831">blinki</tspan><tspan fill="#4CAF50">t</tspan></text></svg>'
+BLINKIT_LOGO_SVG = (
+    '<svg viewBox="0 0 120 28" width="120" height="28" xmlns="http://www.w3.org/2000/svg">'
+    '<text x="0" y="22" font-family="Segoe UI Variable, Segoe UI, -apple-system, sans-serif" '
+    'font-size="22" font-weight="800" letter-spacing="-0.5">'
+    '<tspan fill="#1a1a1a">blink</tspan><tspan fill="#318616">it</tspan>'
+    "</text></svg>"
+)
 
 with st.sidebar:
     st.markdown(f'<div style="padding:4px 0 12px 0;"><div style="display:flex;align-items:center;gap:10px;">{BLINKIT_LOGO_SVG}<div><div style="font-weight:600;font-size:14px;color:var(--neutral-fg-1);line-height:1.2;">Discovery Engine</div><div style="font-size:11px;color:var(--neutral-fg-3);">Cross-shopping inertia analysis</div></div></div></div>', unsafe_allow_html=True)
@@ -969,7 +975,7 @@ with st.sidebar:
     st.markdown(
         "- **Link A** — Discovery Engine (this app)\n"
         "- [Link B — Buy Smart UI](https://ai-native-mvp.vercel.app)\n"
-        "- [Link B — Trust API](https://buy-smart-api.onrender.com/api/health)"
+        "- [Link B — Trust API](https://buy-smart-api.onrender.com)"
     )
 
 # Load data (cache cleared + st.rerun on analyser Re-run reloads CSV fresh)
