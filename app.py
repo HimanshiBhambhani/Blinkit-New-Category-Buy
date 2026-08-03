@@ -971,11 +971,10 @@ with st.sidebar:
     )
 
     st.divider()
-    st.caption("Graduation demo — all three links")
+    st.caption("Graduation demo — Link A & Link B")
     st.markdown(
         "- **Link A** — Discovery Engine (this app)\n"
-        "- [Link B — Buy Smart UI](https://ai-native-mvp.vercel.app)\n"
-        "- [Link B — Trust API](https://buy-smart-api.onrender.com)"
+        "- [Link B — Buy Smart UI](https://ai-native-mvp.vercel.app)"
     )
 
 # Load data (cache cleared + st.rerun on analyser Re-run reloads CSV fresh)
