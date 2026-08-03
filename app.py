@@ -28,6 +28,7 @@ import config
 from engine.themes import identify_themes, get_theme_summary, get_cross_theme_patterns
 from engine.insights import STRATEGIC_QUESTIONS, generate_insight_offline
 from engine.chatbot import RAGChatbot
+from engine.insights import STRATEGIC_QUESTIONS
 from engine.analyser_panel import render_analyser_page
 
 
@@ -1126,6 +1127,13 @@ if page == "Insights":
 elif page == "AI Chatbot":
     st.markdown("## AI Chatbot")
 
+    # Bust cached chatbot when retrieval logic changes (deploy-safe)
+    _CHATBOT_VERSION = 2
+    if st.session_state.get("_chatbot_version") != _CHATBOT_VERSION:
+        st.session_state.pop("chatbot", None)
+        st.session_state.pop("chat_messages", None)
+        st.session_state["_chatbot_version"] = _CHATBOT_VERSION
+
     # Initialize chatbot
     if "chatbot" not in st.session_state:
         faiss_index, faiss_meta = None, None
@@ -1207,17 +1215,7 @@ elif page == "AI Chatbot":
 
     # Suggested questions
     with st.expander("Suggested questions for evaluators", expanded=False):
-        suggestions = [
-            "Why do users repeatedly buy from the same categories?",
-            "What prevents users from exploring new categories?",
-            "How do users discover products today?",
-            "What role do habits play in shopping behavior?",
-            "What information do users need before trying a new category?",
-            "What frustrations emerge repeatedly?",
-            "Which user segments are more likely to experiment?",
-            "What unmet needs emerge consistently across discussions?",
-        ]
-        for s in suggestions:
+        for s in STRATEGIC_QUESTIONS:
             if st.button(s, key=f"suggest_{hash(s)}", use_container_width=True):
                 st.session_state._pending_question = s
 

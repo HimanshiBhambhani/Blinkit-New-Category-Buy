@@ -16,6 +16,8 @@ import streamlit as st
 import config
 from engine.themes import get_theme_summary
 
+GITHUB_ACTIONS_URL = "https://github.com/HimanshiBhambhani/Grad-Project/actions"
+
 
 def _corpus_mtime(path: Path) -> str:
     if not path.exists():
@@ -47,6 +49,30 @@ def render_workflow_section() -> None:
                 f"</div>",
                 unsafe_allow_html=True,
             )
+
+
+def render_github_actions_link() -> None:
+    """CI/CD pipeline link — visible on main Analyser page for evaluators."""
+    st.markdown(
+        '<div class="fluent-card" style="display:flex;align-items:center;gap:var(--space-lg);'
+        'margin:12px 0 4px;padding:var(--space-md) var(--space-lg);">'
+        '<div style="flex:1;">'
+        '<div style="font:var(--font-subtitle-2);color:var(--neutral-fg-1);margin-bottom:4px;">'
+        "GitHub Actions — weekly scrape pipeline"
+        "</div>"
+        '<div style="font-size:13px;color:var(--neutral-fg-2);">'
+        "Automated Play Store / App Store scrape, filter, and corpus rebuild on schedule. "
+        "View run history, logs, and workflow YAML."
+        "</div>"
+        "</div>"
+        f'<a href="{GITHUB_ACTIONS_URL}" target="_blank" rel="noopener noreferrer" '
+        'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;'
+        "background:var(--brand-primary);color:white;border-radius:var(--radius-sm);"
+        'text-decoration:none;font-size:14px;font-weight:600;white-space:nowrap;">'
+        "\u2192 View on GitHub Actions</a>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
 
 
 def render_data_stats(df: pd.DataFrame) -> None:
@@ -191,6 +217,7 @@ def render_analyser_page(
     )
 
     render_workflow_section()
+    render_github_actions_link()
     st.divider()
     render_data_stats(df)
     st.divider()

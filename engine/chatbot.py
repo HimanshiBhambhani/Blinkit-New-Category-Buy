@@ -13,9 +13,120 @@ from collections import Counter
 import pandas as pd
 
 import config
+from engine.insights import STRATEGIC_QUESTIONS, generate_insight, generate_insight_offline
 from engine.pii_filter import strip_pii
 
 logger = logging.getLogger(__name__)
+
+# Low-signal labels — deprioritize in retrieval (Friction Pillar + Primary Theme)
+_LOW_SIGNAL_LABELS = {
+    "Neutral / No Signal",
+    "Unverified Source",
+    "Positive Experience",
+}
+
+# Evaluator question → targeted keyword retrieval (from assignment)
+_EVALUATOR_KEYWORDS = {
+    "Why do users repeatedly buy from the same categories?": [
+        "same", "always", "habit", "routine", "repeat", "regular", "usual",
+        "only buy", "grocery", "go-to", "stick with", "comfortable",
+    ],
+    "What prevents users from exploring new categories?": [
+        "never tried", "don't trust", "scared", "risk", "won't buy",
+        "afraid", "hesitant", "doubt", "unsure", "reluctant", "why would",
+        "trust", "warranty", "return", "refund", "fake", "counterfeit",
+        "price", "expensive", "amazon", "quality", "authentic",
+    ],
+    "How do users discover products today?": [
+        "found", "discover", "saw", "noticed", "search", "banner",
+        "recommended", "suggestion", "notification", "stumbled", "browsing",
+        "didn't know", "did not know", "aware", "category",
+    ],
+    "What role do habits play in shopping behavior?": [
+        "habit", "always", "routine", "every week", "auto", "repeat",
+        "same order", "muscle memory", "default", "go-to", "grocery only",
+    ],
+    "What information do users need before trying a new category?": [
+        "review", "rating", "photo", "detail", "description", "compare",
+        "specification", "warranty", "return", "genuine", "authentic", "trust",
+    ],
+    "What frustrations emerge repeatedly?": [
+        "frustrated", "angry", "worst", "terrible", "pathetic", "issue",
+        "problem", "broken", "damaged", "fake", "expired", "missing",
+        "delayed", "wrong", "refund", "complaint", "warranty",
+    ],
+    "Which user segments are more likely to experiment?": [
+        "tried", "first time", "experiment", "new category", "surprised",
+        "impressed", "good quality", "will buy again", "recommend",
+        "happy", "loved", "great", "amazing", "excellent", "satisfied",
+    ],
+    "What unmet needs emerge consistently across discussions?": [
+        "wish", "need", "want", "should", "missing", "lack", "if only",
+        "why can't", "don't have", "add", "include", "option", "variety",
+    ],
+}
+
+# Semantic query expansion for FAISS when keyword path unavailable
+_QUERY_EXPANSIONS = {
+    "What prevents users from exploring new categories?": (
+        "trust quality price warranty return hesitant afraid won't buy explore "
+        "new categories non-grocery fake counterfeit refund"
+    ),
+    "Why do users repeatedly buy from the same categories?": (
+        "habit routine repeat same grocery only stick comfortable default"
+    ),
+    "How do users discover products today?": (
+        "discover search banner notification browsing unaware category visibility"
+    ),
+    "What role do habits play in shopping behavior?": (
+        "habit routine repeat grocery tunnel vision same order weekly"
+    ),
+    "What information do users need before trying a new category?": (
+        "review rating warranty return authentic trust specification compare"
+    ),
+    "What frustrations emerge repeatedly?": (
+        "frustrated fake damaged refund warranty quality complaint broken"
+    ),
+    "Which user segments are more likely to experiment?": (
+        "tried first time surprised impressed recommend happy new category"
+    ),
+    "What unmet needs emerge consistently across discussions?": (
+        "wish need want missing variety option lack unmet"
+    ),
+}
+
+# Primary themes to boost per strategic question
+_THEME_BOOST = {
+    "What prevents users from exploring new categories?": [
+        "Warranty & Return Anxiety",
+        "Price & Value Concerns",
+        "Category Unawareness",
+        "Quality & Authenticity Risk",
+        "Discovery Blind Spots",
+    ],
+    "Why do users repeatedly buy from the same categories?": [
+        "Habitual Tunnel Vision",
+        "Category Unawareness",
+    ],
+    "How do users discover products today?": [
+        "Category Unawareness",
+        "Discovery Blind Spots",
+    ],
+    "What role do habits play in shopping behavior?": [
+        "Habitual Tunnel Vision",
+    ],
+    "What information do users need before trying a new category?": [
+        "Warranty & Return Anxiety",
+        "Quality & Authenticity Risk",
+        "Price & Value Concerns",
+    ],
+    "What frustrations emerge repeatedly?": [
+        "Warranty & Return Anxiety",
+        "Quality & Authenticity Risk",
+        "Customer Support Failures",
+        "Price & Value Concerns",
+    ],
+}
 
 # --------------- Safety Patterns ---------------
 
@@ -313,6 +424,78 @@ class RAGChatbot:
 
     # --- Retrieval ---
 
+    @staticmethod
+    def _normalize_question(q: str) -> str:
+        return q.strip().lower().rstrip("?").strip()
+
+    def _match_strategic_question(self, q: str) -> str | None:
+        """Match user input to one of the 8 evaluator strategic questions."""
+        qn = self._normalize_question(q)
+        for sq in STRATEGIC_QUESTIONS:
+            if self._normalize_question(sq) == qn:
+                return sq
+        for sq in STRATEGIC_QUESTIONS:
+            sn = self._normalize_question(sq)
+            if qn in sn or sn in qn:
+                return sq
+        return None
+
+    @staticmethod
+    def _row_labels(row: dict) -> tuple[str, str]:
+        theme = str(row.get("Primary Theme") or row.get("Friction Pillar") or "")
+        pillar = str(row.get("Friction Pillar") or "")
+        return theme, pillar
+
+    def _is_low_signal(self, row: dict) -> bool:
+        theme, pillar = self._row_labels(row)
+        return theme in _LOW_SIGNAL_LABELS or pillar in _LOW_SIGNAL_LABELS
+
+    def _score_review_for_question(self, row: dict, question: str, keywords: list[str]) -> int:
+        text = str(row.get("Raw Content", "")).lower()
+        score = sum(2 for kw in keywords if kw in text)
+        theme, pillar = self._row_labels(row)
+        for label in _THEME_BOOST.get(question, []):
+            if theme == label or pillar == label:
+                score += 6
+        if self._is_low_signal(row):
+            score -= 12
+        if theme and theme not in _LOW_SIGNAL_LABELS:
+            score += 1
+        return score
+
+    def _strategic_keyword_retrieve(self, question: str, top_k: int = 20) -> list[dict]:
+        keywords = _EVALUATOR_KEYWORDS.get(question, [])
+        tmp = self.df.copy()
+        tmp["_s"] = tmp.apply(
+            lambda row: self._score_review_for_question(row.to_dict(), question, keywords),
+            axis=1,
+        )
+        rel = tmp[tmp["_s"] > 0].nlargest(top_k, "_s")
+        if len(rel) < MIN_EVIDENCE:
+            # Relax: include theme-boosted reviews even without keyword hit
+            boosted = tmp[
+                tmp.apply(
+                    lambda row: any(
+                        lbl in (row.get("Primary Theme"), row.get("Friction Pillar"))
+                        for lbl in _THEME_BOOST.get(question, [])
+                    ),
+                    axis=1,
+                )
+            ].nlargest(top_k, "_s")
+            rel = pd.concat([rel, boosted]).drop_duplicates().nlargest(top_k, "_s")
+        if rel.empty:
+            rel = tmp.nlargest(top_k, "_s")
+        return rel.drop(columns=["_s"], errors="ignore").to_dict("records")
+
+    def _prioritize_meaningful(self, reviews: list[dict], top_k: int) -> list[dict]:
+        """Prefer reviews with actionable themes; keep low-signal only if needed."""
+        strong = [r for r in reviews if not self._is_low_signal(r)]
+        weak = [r for r in reviews if self._is_low_signal(r)]
+        out = strong[:top_k]
+        if len(out) < top_k:
+            out.extend(weak[: top_k - len(out)])
+        return out[:top_k]
+
     def _faiss_retrieve(self, q, top_k=15):
         from engine import search
         return search(q, self.index, self.metadata, top_k=top_k)
@@ -327,19 +510,36 @@ class RAGChatbot:
         }
         kws = [w for w in q.lower().split() if len(w) > 2 and w not in stops]
         if not kws:
-            return self.df.sample(min(top_k, len(self.df))).to_dict("records")
+            sample = self.df[
+                ~self.df.apply(
+                    lambda row: self._is_low_signal(row.to_dict()), axis=1
+                )
+            ]
+            if sample.empty:
+                sample = self.df
+            return sample.sample(min(top_k, len(sample))).to_dict("records")
         tmp = self.df.copy()
         tmp["_s"] = tmp["Raw Content"].apply(
             lambda t: sum(1 for k in kws if k in str(t).lower())
         )
         rel = tmp[tmp["_s"] > 0].nlargest(top_k, "_s")
         if rel.empty:
-            rel = self.df.sample(min(top_k, len(self.df)))
-        return rel.drop(columns=["_s"], errors="ignore").to_dict("records")
+            rel = tmp.nlargest(top_k, "_s")
+        records = rel.drop(columns=["_s"], errors="ignore").to_dict("records")
+        return self._prioritize_meaningful(records, top_k)
 
     def retrieve(self, q, top_k=15):
+        strategic = self._match_strategic_question(q)
+        if strategic:
+            return self._prioritize_meaningful(
+                self._strategic_keyword_retrieve(strategic, top_k=max(top_k, 20)),
+                top_k,
+            )
+
+        search_q = _QUERY_EXPANSIONS.get(strategic or "", q)
         if self.has_faiss:
-            return self._faiss_retrieve(q, top_k)
+            raw = self._faiss_retrieve(search_q, top_k=top_k * 2)
+            return self._prioritize_meaningful(raw, top_k)
         return self._keyword_retrieve(q, top_k)
 
     # --- Evidence Formatting ---
@@ -349,13 +549,44 @@ class RAGChatbot:
         lines = []
         for i, r in enumerate(reviews, 1):
             cat = r.get("Target Category", "N/A")
-            pil = r.get("Friction Pillar", "N/A")
+            theme = r.get("Primary Theme") or r.get("Friction Pillar", "N/A")
             src = r.get("Source", "N/A")
             txt = strip_pii(str(r.get("Raw Content", ""))[:500])
-            lines.append(f"[{i}] Source: {src} | Category: {cat} | Pillar: {pil}")
+            lines.append(f"[{i}] Source: {src} | Category: {cat} | Theme: {theme}")
             lines.append(f'    "{txt}"')
             lines.append("")
         return "\n".join(lines)
+
+    @staticmethod
+    def _format_insight_markdown(insight: dict, evidence_count: int) -> str:
+        """Render structured insight (evaluator-friendly)."""
+        parts = [
+            f"**Executive summary** ({evidence_count} reviews analyzed)\n\n"
+            f"{insight.get('executive_summary', '')}",
+            "",
+            f"**Key insight:** {insight.get('key_insight', '')}",
+        ]
+        themes = insight.get("themes") or []
+        if themes:
+            parts.extend(["", "**Themes from evidence:**"])
+            for t in themes[:4]:
+                name = t.get("theme_name", "Theme")
+                desc = t.get("description", "")
+                count = t.get("evidence_count", 0)
+                parts.append(f"- **{name}** ({count} reviews) — {desc}")
+                for quote in (t.get("representative_quotes") or [])[:2]:
+                    q = strip_pii(str(quote)[:220]).strip()
+                    if q:
+                        parts.append(f'  - *"{q}"*')
+        recs = insight.get("actionable_recommendations") or []
+        if recs:
+            parts.extend(["", "**Implications for product:**"])
+            for rec in recs[:3]:
+                parts.append(f"- {rec}")
+        gap = insight.get("evidence_gap")
+        if gap:
+            parts.extend(["", f"*Evidence note:* {gap}"])
+        return "\n".join(parts)
 
     # --- Main Ask ---
 
@@ -432,20 +663,40 @@ class RAGChatbot:
         )
 
         # Generate
-        if self.has_api_key:
-            ans = self._gen_ai(question, ev_block, cd, pd_str, len(ev), brief)
+        strategic = self._match_strategic_question(question)
+        if strategic:
+            if self.has_api_key:
+                try:
+                    insight = generate_insight(strategic, ev)
+                    if insight.get("executive_summary") and "Analysis failed" not in insight.get("executive_summary", ""):
+                        ans = self._format_insight_markdown(insight, len(ev))
+                    else:
+                        ans = self._gen_offline(strategic, ev)
+                except Exception as e:
+                    logger.error("Strategic insight generation failed: %s", e)
+                    ans = self._gen_offline(strategic, ev)
+            else:
+                ans = self._gen_offline(strategic, ev)
+        elif self.has_api_key:
+            ans = self._gen_ai(question, ev_block, cd, pd_str, len(ev), brief, ev)
         else:
             ans = self._gen_offline(question, ev)
 
         self.conversation_history.append({"role": "user", "content": question})
         self.conversation_history.append({"role": "assistant", "content": ans})
 
-        if self.has_api_key and self.has_faiss:
+        if strategic:
+            mode = (
+                "Strategic insight (Groq + targeted retrieval)"
+                if self.has_api_key
+                else "Strategic insight (offline + targeted retrieval)"
+            )
+        elif self.has_api_key and self.has_faiss:
             mode = "AI (Groq Llama 3.3 + FAISS)"
         elif self.has_api_key:
             mode = "AI (Groq Llama 3.3 + keyword)"
         else:
-            mode = "Offline (keyword retrieval)"
+            mode = "Offline (keyword retrieval + rule-based)"
 
         return {
             "answer": ans,
@@ -461,7 +712,7 @@ class RAGChatbot:
             "was_refused": False,
         }
 
-    def _gen_ai(self, question, ev_block, cd, pd_str, n, brief=False):
+    def _gen_ai(self, question, ev_block, cd, pd_str, n, brief=False, evidence=None):
         from groq import Groq
 
         client = Groq(api_key=config.GROQ_API_KEY)
@@ -487,36 +738,16 @@ class RAGChatbot:
             return resp.choices[0].message.content
         except Exception as e:
             logger.error("AI generation failed: %s", e)
-            return self._gen_offline(question, [])
+            return self._gen_offline(question, evidence or [])
 
     def _gen_offline(self, question, evidence):
         if not evidence:
             return (
-                "I couldn't find relevant evidence. Try rephrasing, or ensure "
-                "FAISS index is built and GROQ_API_KEY is set."
+                "I couldn't find relevant evidence for this question. Try one of the "
+                "**Suggested questions for evaluators**, or ensure the corpus CSV is loaded."
             )
-        cats = Counter(r.get("Target Category", "") for r in evidence)
-        pils = Counter(r.get("Friction Pillar", "") for r in evidence)
-        tc = cats.most_common(1)[0][0] if cats else "N/A"
-        tp = pils.most_common(1)[0][0] if pils else "N/A"
-        quotes = []
-        for r in evidence[:5]:
-            txt = strip_pii(str(r.get("Raw Content", ""))[:200])
-            src = r.get("Source", "")
-            cat = r.get("Target Category", "")
-            if txt.strip():
-                quotes.append(f'*"{txt}"* - {src}, {cat}')
-        qb = "\n".join(f"- {q}" for q in quotes) if quotes else "No quotes."
-        return (
-            f"**Based on {len(evidence)} relevant reviews:**\n\n"
-            f"The dominant pattern relates to **{tp}**, primarily in **{tc}**.\n\n"
-            f"**Category breakdown:** "
-            f"{', '.join(f'{k} ({v})' for k, v in cats.most_common(5))}\n\n"
-            f"**Pillar breakdown:** "
-            f"{', '.join(f'{k} ({v})' for k, v in pils.most_common())}\n\n"
-            f"**Representative quotes:**\n{qb}\n\n"
-            f"*Note: Offline analysis. Set GROQ_API_KEY for AI-powered answers.*"
-        )
+        insight = generate_insight_offline(question, evidence)
+        return self._format_insight_markdown(insight, len(evidence))
 
     def clear_history(self):
         self.conversation_history.clear()
