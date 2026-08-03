@@ -10,8 +10,6 @@ Graduation project — **Discovery Engine (Link A)** finds trust friction; **Buy
 | **Link B** — Buy Smart UI (Vercel) | https://ai-native-mvp.vercel.app |
 | **Link B** — Trust API (Render) | https://buy-smart-api.onrender.com |
 
-Health check: `curl -s https://buy-smart-api.onrender.com/api/health`
-
 ## Repo layout
 
 ```

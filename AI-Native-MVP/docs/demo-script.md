@@ -10,11 +10,10 @@
 |-----------|-----|
 | Link A — Discovery Engine | https://grad-project-2ublqkxwzyxtpeczjt8zxi.streamlit.app/ |
 | Link B — Buy Smart UI | https://ai-native-mvp.vercel.app |
-| Link B — Trust API | https://buy-smart-api.onrender.com/api/health |
+| Link B — Trust API | https://buy-smart-api.onrender.com |
 
 **Pre-demo check (2 min before):**
 ```bash
-curl -s https://buy-smart-api.onrender.com/api/health
 curl -s https://buy-smart-api.onrender.com/api/trust/product/boat-airdopes-141 | head -c 200
 ```
 

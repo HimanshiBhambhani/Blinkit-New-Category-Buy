@@ -24,8 +24,8 @@ else
   echo "==> Skipping pre-warm (SKIP_PREWARM=1)"
 fi
 
-echo "==> API health"
-curl -sf "$API_URL/api/health" | python3 -m json.tool
+echo "==> API categories (smoke)"
+curl -sf "$API_URL/api/trust/categories" | python3 -m json.tool | head -20
 
 echo "==> boAt product trust"
 curl -sf "$API_URL/api/trust/product/boat-airdopes-141" | python3 -m json.tool | head -20
