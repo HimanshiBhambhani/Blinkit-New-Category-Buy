@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getListImage, getPdpImage, isProductScreenshot } from "@/lib/stitchAssets";
+import { assetUrl, getListImage, getPdpImage, isProductScreenshot } from "@/lib/stitchAssets";
 
 interface ProductImageProps {
   productId: string;
@@ -20,7 +20,7 @@ function ScreenshotImage({ alt, src, variant }: { alt: string; src: string; vari
         }
         height={600}
         priority={variant === "pdp"}
-        src={src}
+        src={assetUrl(src)}
         width={1200}
       />
     </div>
@@ -49,7 +49,7 @@ export function ProductImage({ productId, emoji, alt, variant }: ProductImagePro
         fill
         priority
         sizes="430px"
-        src={src}
+        src={assetUrl(src)}
       />
     );
   }
@@ -60,7 +60,7 @@ export function ProductImage({ productId, emoji, alt, variant }: ProductImagePro
         alt={alt}
         className="h-[80%] w-[80%] object-contain"
         height={160}
-        src={src}
+        src={assetUrl(src)}
         width={160}
       />
     );
