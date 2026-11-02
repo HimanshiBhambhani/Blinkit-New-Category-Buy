@@ -1,0 +1,22 @@
+404.html
+  h_a005f92defb7d8 1
+404/index.html
+  h_a005f92defb7d8 1
+_next/static/u1ltkplEi_sU_yYcPDltw/_ssgManifest.js
+  h_a005f92defb7d8 1
+index.html
+  h_a005f92defb7d8 1
+index.txt
+  h_a005f92defb7d8 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f168ac987f86ef3d41837a72b53487d995f5c0b1",
+  "prompts": {},
+  "humans": {
+    "h_a005f92defb7d8": {
+      "author": "hibhambh <hibhambh@cisco.com>"
+    }
+  }
+}
