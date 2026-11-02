@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BlinkitHeader } from "@/components/BlinkitHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { PageFrame } from "@/components/PageFrame";
-import { BANNER_HERO, HOME_CATEGORIES } from "@/lib/stitchAssets";
+import { assetUrl, BANNER_HERO, HOME_CATEGORIES } from "@/lib/stitchAssets";
 
 export default function HomePage() {
   return (
@@ -31,7 +31,7 @@ export default function HomePage() {
             <div
               aria-hidden
               className="pointer-events-none absolute inset-y-0 right-0 w-[46%] bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url('${BANNER_HERO}')` }}
+              style={{ backgroundImage: `url('${assetUrl(BANNER_HERO)}')` }}
             />
             <div
               aria-hidden
@@ -52,7 +52,7 @@ export default function HomePage() {
                 <>
                   <div
                     className="mb-2 h-[88px] w-[88px] bg-contain bg-center bg-no-repeat"
-                    style={{ backgroundImage: `url('${cat.image}')` }}
+                    style={{ backgroundImage: `url('${assetUrl(cat.image)}')` }}
                   />
                   <span className="line-clamp-2 px-1 text-center text-[12px] font-semibold leading-tight text-on-surface">
                     {cat.label}

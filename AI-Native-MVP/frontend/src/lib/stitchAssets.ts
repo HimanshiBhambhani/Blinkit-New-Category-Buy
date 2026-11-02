@@ -10,6 +10,17 @@ export const STITCH_REF = {
   seeHow: "/stitch/04-see-how.png",
 } as const;
 
+/**
+ * Prefix for raw asset URLs used outside next/image (e.g. CSS background-image),
+ * which do NOT get Next.js basePath applied automatically. Empty in dev.
+ */
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+/** Prepend the deploy basePath to a public asset path (for CSS/background usage). */
+export function assetUrl(path: string): string {
+  return `${BASE_PATH}${path}`;
+}
+
 export const BLINKIT_LOGO = "/brand/blinkit-logo.png";
 
 export const BANNER_HERO = "/brand/banner-hero.png";
