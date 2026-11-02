@@ -1,0 +1,35 @@
+AI-Native-MVP/frontend/src/app/product/[id]/see-how/page.tsx
+  s_20e00a9cd0a679::t_ddf766f8e291d3 7,13-14
+  s_20e00a9cd0a679::t_ed8c4822cd4f5c 15-16
+AI-Native-MVP/frontend/next.config.mjs
+  s_20e00a9cd0a679::t_1252f3e61d8bfd 1-5,8-15,17
+AI-Native-MVP/frontend/src/app/category/[slug]/page.tsx
+  s_20e00a9cd0a679::t_ddf766f8e291d3 13-14
+  s_20e00a9cd0a679::t_5cfcd95bb70155 15-16
+AI-Native-MVP/frontend/src/app/product/[id]/page.tsx
+  s_20e00a9cd0a679::t_ddf766f8e291d3 9,16-17
+  s_20e00a9cd0a679::t_922e5119abe29b 18-19
+AI-Native-MVP/frontend/src/lib/api.ts
+  s_20e00a9cd0a679::t_ddf766f8e291d3 10,13
+AI-Native-MVP/frontend/src/lib/mockTrust.ts
+  s_20e00a9cd0a679::t_ddf766f8e291d3 159-162
+AI-Native-MVP/frontend/src/app/product/[id]/how-calculated/page.tsx
+  s_20e00a9cd0a679::t_ddf766f8e291d3 7,13-14
+  s_20e00a9cd0a679::t_454efd758a3616 15-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "95a0ecf5fd8c12851e2c64f89ef788e9dc77123d",
+  "prompts": {},
+  "sessions": {
+    "s_20e00a9cd0a679": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "64bb63e3-43da-49c4-8004-264aa2a44049",
+        "model": "claude-opus-4.8"
+      },
+      "human_author": "hibhambh <hibhambh@cisco.com>"
+    }
+  }
+}
