@@ -7,7 +7,7 @@ Streamlit dashboard for cross-shopping friction analysis — **1,504** classifie
 | Link | URL |
 |------|-----|
 | **Link A** — Discovery Engine (this app) | https://grad-project-2ublqkxwzyxtpeczjt8zxi.streamlit.app/ |
-| **Link B** — Buy Smart UI | https://ai-native-mvp.vercel.app |
+| **Link B** — Buy Smart UI | https://himanshibhambhani.github.io/Blinkit-New-Category-Buy/ |
 
 The sidebar in the running app lists Link A and Link B UI.
 
