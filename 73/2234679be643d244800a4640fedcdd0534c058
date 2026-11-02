@@ -1,0 +1,105 @@
+404.html
+  s_20e00a9cd0a679::t_4ef9d6d7f8e808 1
+404/index.html
+  s_20e00a9cd0a679::t_d4a7bf3380d03f 1
+category/electronics/index.html
+  s_20e00a9cd0a679::t_caf106915cbc4c 1
+category/electronics/index.txt
+  s_20e00a9cd0a679::t_23a92913398c61 4,8
+category/personal_care_beauty/index.html
+  s_20e00a9cd0a679::t_46bc22d70281a5 1
+category/personal_care_beauty/index.txt
+  s_20e00a9cd0a679::t_b594b46161e9e2 4,8
+index.html
+  s_20e00a9cd0a679::t_0ecf449c194184 1
+index.txt
+  s_20e00a9cd0a679::t_710897f2ee6415 5
+product/apple-earpods/how-calculated/index.html
+  s_20e00a9cd0a679::t_3bc10888243e0b 1
+product/apple-earpods/how-calculated/index.txt
+  s_20e00a9cd0a679::t_e3f74471e0355d 4
+product/apple-earpods/index.html
+  s_20e00a9cd0a679::t_b12ed664b08914 1
+product/apple-earpods/index.txt
+  s_20e00a9cd0a679::t_ff7078768bd802 4,7
+product/apple-earpods/see-how/index.html
+  s_20e00a9cd0a679::t_1f30c5c5265e31 1
+product/apple-earpods/see-how/index.txt
+  s_20e00a9cd0a679::t_7906d2ab614e61 4
+product/boat-airdopes-141/how-calculated/index.html
+  s_20e00a9cd0a679::t_aaa0a3f3c7fbd4 1
+product/boat-airdopes-141/how-calculated/index.txt
+  s_20e00a9cd0a679::t_ba3a3974003937 4
+product/boat-airdopes-141/index.html
+  s_20e00a9cd0a679::t_ee5c3b3d03f195 1
+product/boat-airdopes-141/index.txt
+  s_20e00a9cd0a679::t_14f8b1c62cf839 4,7
+product/boat-airdopes-141/see-how/index.html
+  s_20e00a9cd0a679::t_7466135f679c10 1
+product/boat-airdopes-141/see-how/index.txt
+  s_20e00a9cd0a679::t_460a22935869e7 4
+product/cerave-moisturizer/how-calculated/index.html
+  s_20e00a9cd0a679::t_7202d834c5c8ff 1
+product/cerave-moisturizer/how-calculated/index.txt
+  s_20e00a9cd0a679::t_1a2c2c763a3847 4
+product/cerave-moisturizer/index.html
+  s_20e00a9cd0a679::t_449e50bc937cdc 1
+product/cerave-moisturizer/index.txt
+  s_20e00a9cd0a679::t_943bf52ccd4374 4,7
+product/cerave-moisturizer/see-how/index.html
+  s_20e00a9cd0a679::t_3362cd205bad7f 1
+product/cerave-moisturizer/see-how/index.txt
+  s_20e00a9cd0a679::t_e5a9c27fe64413 4
+product/jbl-go-3/how-calculated/index.html
+  s_20e00a9cd0a679::t_b98e88a6f4e519 1
+product/jbl-go-3/how-calculated/index.txt
+  s_20e00a9cd0a679::t_d6d0cec0d4c176 4
+product/jbl-go-3/index.html
+  s_20e00a9cd0a679::t_688d9d2bb92f34 1
+product/jbl-go-3/index.txt
+  s_20e00a9cd0a679::t_b33f4d54365844 4,7
+product/jbl-go-3/see-how/index.html
+  s_20e00a9cd0a679::t_6c155854788fbd 1
+product/jbl-go-3/see-how/index.txt
+  s_20e00a9cd0a679::t_e7654336594484 4
+product/minimalist-serum/how-calculated/index.html
+  s_20e00a9cd0a679::t_258e504d60bb40 1
+product/minimalist-serum/how-calculated/index.txt
+  s_20e00a9cd0a679::t_2e8723bc6a29fd 4
+product/minimalist-serum/index.html
+  s_20e00a9cd0a679::t_3e4fbc31a1ba5e 1
+product/minimalist-serum/index.txt
+  s_20e00a9cd0a679::t_79fb0aa49dade1 4,7
+product/minimalist-serum/see-how/index.html
+  s_20e00a9cd0a679::t_5377ff86ca2618 1
+product/minimalist-serum/see-how/index.txt
+  s_20e00a9cd0a679::t_dfa4913db82469 4
+product/realme-buds/how-calculated/index.html
+  s_20e00a9cd0a679::t_903c0266fba9a4 1
+product/realme-buds/how-calculated/index.txt
+  s_20e00a9cd0a679::t_d9848e1c67e220 4
+product/realme-buds/index.html
+  s_20e00a9cd0a679::t_22140333ef78fe 1
+product/realme-buds/index.txt
+  s_20e00a9cd0a679::t_4599f4c35bb70c 4,7
+product/realme-buds/see-how/index.html
+  s_20e00a9cd0a679::t_d6f1953f8e8fa7 1
+product/realme-buds/see-how/index.txt
+  s_20e00a9cd0a679::t_7476bf5279262c 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "732234679be643d244800a4640fedcdd0534c058",
+  "prompts": {},
+  "sessions": {
+    "s_20e00a9cd0a679": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "64bb63e3-43da-49c4-8004-264aa2a44049",
+        "model": "claude-opus-4.8"
+      },
+      "human_author": "hibhambh <hibhambh@cisco.com>"
+    }
+  }
+}
