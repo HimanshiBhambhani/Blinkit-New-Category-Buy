@@ -1,0 +1,23 @@
+AI-Native-MVP/frontend/src/app/page.tsx
+  s_20e00a9cd0a679::t_cbe28bfe45aa83 5,34,55
+AI-Native-MVP/frontend/src/lib/stitchAssets.ts
+  s_20e00a9cd0a679::t_cbe28bfe45aa83 13-23
+AI-Native-MVP/frontend/next.config.mjs
+  s_20e00a9cd0a679::t_cbe28bfe45aa83 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2adb19e81eea9e7da8f0d8881a0655e9918c95ba",
+  "prompts": {},
+  "sessions": {
+    "s_20e00a9cd0a679": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "64bb63e3-43da-49c4-8004-264aa2a44049",
+        "model": "claude-opus-4.8"
+      },
+      "human_author": "hibhambh <hibhambh@cisco.com>"
+    }
+  }
+}
