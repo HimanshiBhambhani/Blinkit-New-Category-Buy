@@ -1,6 +1,20 @@
+// Static export for GitHub Pages is toggled with STATIC_EXPORT=1.
+// Served from https://<user>.github.io/Blinkit-New-Category-Buy/
+const isStaticExport = process.env.STATIC_EXPORT === "1";
+const repoBasePath = "/Blinkit-New-Category-Buy";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(isStaticExport
+    ? {
+        output: "export",
+        basePath: repoBasePath,
+        assetPrefix: `${repoBasePath}/`,
+        trailingSlash: true,
+      }
+    : {}),
   images: {
+    unoptimized: isStaticExport,
     remotePatterns: [
       {
         protocol: "https",

@@ -7,8 +7,10 @@ import {
 import type { CategoryTrust, ProductCard, ProductTrust } from "./types";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const DEMO = process.env.NEXT_PUBLIC_DEMO === "1";
 
 async function fetchJson<T>(path: string): Promise<T | null> {
+  if (DEMO) return null;
   try {
     const res = await fetch(`${API}${path}`, { cache: "no-store" });
     if (!res.ok) return null;

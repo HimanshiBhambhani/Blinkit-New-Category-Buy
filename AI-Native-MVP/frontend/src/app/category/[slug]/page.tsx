@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { notFound } from "next/navigation";
 import { BackHeader } from "@/components/BlinkitHeader";
 import { BottomNav } from "@/components/BottomNav";
@@ -10,6 +8,10 @@ import { getCategory, getProducts } from "@/lib/api";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export function generateStaticParams() {
+  return [{ slug: "electronics" }, { slug: "personal_care_beauty" }];
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

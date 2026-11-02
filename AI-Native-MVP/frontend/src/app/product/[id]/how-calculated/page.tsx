@@ -1,14 +1,17 @@
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SeeHowHeader } from "@/components/BlinkitHeader";
 import { PageFrame } from "@/components/PageFrame";
 import { TrustMethodologyContent } from "@/components/TrustMethodologyContent";
 import { getProduct } from "@/lib/api";
+import { ALL_PRODUCT_IDS } from "@/lib/mockTrust";
 
 interface HowCalculatedPageProps {
   params: Promise<{ id: string }>;
+}
+
+export function generateStaticParams() {
+  return ALL_PRODUCT_IDS.map((id) => ({ id }));
 }
 
 export default async function HowCalculatedPage({ params }: HowCalculatedPageProps) {

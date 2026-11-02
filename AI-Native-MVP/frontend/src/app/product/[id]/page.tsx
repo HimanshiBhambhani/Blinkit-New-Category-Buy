@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { PdpHeader } from "@/components/BlinkitHeader";
@@ -8,10 +6,15 @@ import { ProductImage } from "@/components/ProductImage";
 import { SeeHowLink, TrustBadge } from "@/components/TrustBadge";
 import { TrustRow } from "@/components/TrustRow";
 import { formatPrice, getProduct } from "@/lib/api";
+import { ALL_PRODUCT_IDS } from "@/lib/mockTrust";
 import { discountPct, getProductVisual } from "@/lib/stitchAssets";
 
 interface ProductPageProps {
   params: Promise<{ id: string }>;
+}
+
+export function generateStaticParams() {
+  return ALL_PRODUCT_IDS.map((id) => ({ id }));
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {

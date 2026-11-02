@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import Link from "next/link";
 import { BlinkitHeader } from "@/components/BlinkitHeader";
 import { BottomNav } from "@/components/BottomNav";

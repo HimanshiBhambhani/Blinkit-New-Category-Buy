@@ -156,6 +156,10 @@ export const MOCK_PRODUCT_DETAIL: Record<string, ProductTrust> = {
   "boat-airdopes-141": BOAT_MOCK_DETAIL,
 };
 
+export const ALL_PRODUCT_IDS: string[] = Object.values(MOCK_PRODUCTS)
+  .flat()
+  .map((p) => p.product_id);
+
 export function mockCategory(slug: string): CategoryTrust | undefined {
   return MOCK_CATEGORIES.find((c) => c.category === slug);
 }
